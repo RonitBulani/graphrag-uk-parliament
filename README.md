@@ -1,4 +1,4 @@
-# GraphRAG for Multi-Hop Parliamentary Reasoning
+# GraphRAG for Multi-Hop Reasoning over UK Parliamentary Speech
 
 A solo MSc Data Science project exploring whether graph-guided retrieval improves question answering over UK parliamentary Brexit speeches when the question requires evidence across several speakers, parties, topics or time periods.
 
@@ -111,7 +111,7 @@ More detail is in [`results/RESULTS.md`](results/RESULTS.md).
 ## Repository structure
 
 ```text
-graphrag-parliamentary-reasoning/
+graphrag-uk-parliament/
 ├── src/
 │   ├── 01_data_loading.py
 │   ├── 02_vectorisation.py
