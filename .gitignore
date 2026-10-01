@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Environment / secrets
+.env
+.env.*
+*.key
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Source and derived datasets
+archive.zip
+data/parlspeech_brexit_filtered.csv
+data/vectorstore/
+data/knowledge_graph.graphml
+data/knowledge_graph_metadata.json
+
+# Large generated outputs
+results/naive_rag_results.json
+results/graphrag_results.json
+results/ground_truth.json
+results/pooled_references.json
+
+# Caches / checkpoints
+.cache/
+checkpoints/
+*.pt
+*.pth
+
+# Temporary
+*.log
+*.tmp

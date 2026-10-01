@@ -1,0 +1,1102 @@
+{
+  "1": {
+    "question": "What is Article 50 and how was it triggered?",
+    "hop_group": "1-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 0.956,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.767,
+      "answer_relevancy": 0.586,
+      "context_precision": 1.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 0.956,
+      "faithfulness": 0.167,
+      "speaker_div_ret": 5,
+      "bert_score": 0.808,
+      "answer_relevancy": 0.775,
+      "context_precision": 0.867
+    }
+  },
+  "2": {
+    "question": "What were the main arguments for leaving the European Union?",
+    "hop_group": "1-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.25,
+      "speaker_div_ret": 5,
+      "bert_score": 0.781,
+      "answer_relevancy": 0.838,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.25,
+      "speaker_div_ret": 5,
+      "bert_score": 0.695,
+      "answer_relevancy": 0.486,
+      "context_precision": 0.0
+    }
+  },
+  "3": {
+    "question": "How did the Labour Party's stance on Brexit differ from the Conservative Party's position?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 0.956,
+      "faithfulness": 0.222,
+      "speaker_div_ret": 5,
+      "bert_score": 0.812,
+      "answer_relevancy": 0.816,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 0.967,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.79,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0
+    }
+  },
+  "4": {
+    "question": "What was the Northern Ireland backstop and why was it controversial?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 0.853,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 4,
+      "bert_score": 0.795,
+      "answer_relevancy": 0.805,
+      "context_precision": 0.589
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 0.885,
+      "faithfulness": 0.167,
+      "speaker_div_ret": 5,
+      "bert_score": 0.814,
+      "answer_relevancy": 0.875,
+      "context_precision": 0.533
+    }
+  },
+  "5": {
+    "question": "How did Theresa May's withdrawal agreement differ from a no-deal Brexit?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.2,
+      "speaker_div_ret": 4,
+      "bert_score": 0.787,
+      "answer_relevancy": 0.82,
+      "context_precision": 0.533
+    },
+    "graphrag": {
+      "mrr": 0.25,
+      "ndcg_5": 0.431,
+      "faithfulness": 0.167,
+      "speaker_div_ret": 5,
+      "bert_score": 0.75,
+      "answer_relevancy": 1.0,
+      "context_precision": 0.95
+    }
+  },
+  "6": {
+    "question": "How did the debate around the customs union evolve from 2016 to 2019?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 5,
+      "bert_score": 0.812,
+      "answer_relevancy": 0.79,
+      "context_precision": 0.833
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.805,
+      "answer_relevancy": 0.554,
+      "context_precision": 0.0
+    }
+  },
+  "7": {
+    "question": "What did MPs say about the economic impact of ending freedom of movement after Brexit?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 0.333,
+      "ndcg_5": 0.544,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 4,
+      "bert_score": 0.796,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.887
+    },
+    "graphrag": {
+      "mrr": 0.5,
+      "ndcg_5": 0.761,
+      "faithfulness": 0.167,
+      "speaker_div_ret": 5,
+      "bert_score": 0.809,
+      "answer_relevancy": 0.758,
+      "context_precision": 0.0
+    }
+  },
+  "8": {
+    "question": "How did the SNP's position on Brexit relate to their argument for Scottish independence?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 0.333,
+      "ndcg_5": 0.618,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 4,
+      "bert_score": 0.836,
+      "answer_relevancy": 0.78,
+      "context_precision": 1.0
+    },
+    "graphrag": {
+      "mrr": 0.25,
+      "ndcg_5": 0.431,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.824,
+      "answer_relevancy": 0.803,
+      "context_precision": 0.5
+    }
+  },
+  "9": {
+    "question": "What were the key criticisms of the Chequers plan, and how did they lead to its failure?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.1,
+      "speaker_div_ret": 4,
+      "bert_score": 0.778,
+      "answer_relevancy": 0.0,
+      "context_precision": 1.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 0.956,
+      "faithfulness": 0.5,
+      "speaker_div_ret": 5,
+      "bert_score": 0.759,
+      "answer_relevancy": 0.957,
+      "context_precision": 0.887
+    }
+  },
+  "10": {
+    "question": "How did Conservative backbenchers rebel against or criticise their own government's Brexit deal?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 0.5,
+      "ndcg_5": 0.712,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 4,
+      "bert_score": 0.808,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 0.92,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.806,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0
+    }
+  },
+  "11": {
+    "question": "What is the European Research Group and what role did it play in Brexit debates?",
+    "hop_group": "1-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 3,
+      "bert_score": 0.782,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 0.905,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 5,
+      "bert_score": 0.806,
+      "answer_relevancy": 0.804,
+      "context_precision": 0.0
+    }
+  },
+  "12": {
+    "question": "What was the DUP's position on Brexit and the Northern Ireland protocol?",
+    "hop_group": "1-hop",
+    "naive": {
+      "mrr": 0.333,
+      "ndcg_5": 0.618,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 4,
+      "bert_score": 0.834,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.5
+    },
+    "graphrag": {
+      "mrr": 0.2,
+      "ndcg_5": 0.387,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 5,
+      "bert_score": 0.798,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.5
+    }
+  },
+  "13": {
+    "question": "What did MPs say about a no-deal Brexit and its potential consequences?",
+    "hop_group": "1-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 0.905,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.84,
+      "answer_relevancy": 0.721,
+      "context_precision": 1.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.776,
+      "answer_relevancy": 0.67,
+      "context_precision": 0.2
+    }
+  },
+  "14": {
+    "question": "What are WTO trading terms and how were they discussed in Brexit debates?",
+    "hop_group": "1-hop",
+    "naive": {
+      "mrr": 0.5,
+      "ndcg_5": 0.624,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 4,
+      "bert_score": 0.81,
+      "answer_relevancy": 0.805,
+      "context_precision": 1.0
+    },
+    "graphrag": {
+      "mrr": 0.5,
+      "ndcg_5": 0.68,
+      "faithfulness": 0.167,
+      "speaker_div_ret": 5,
+      "bert_score": 0.827,
+      "answer_relevancy": 0.779,
+      "context_precision": 1.0
+    }
+  },
+  "15": {
+    "question": "What is the Good Friday Agreement and how was it invoked during Brexit debates?",
+    "hop_group": "1-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 4,
+      "bert_score": 0.835,
+      "answer_relevancy": 0.865,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 0.853,
+      "faithfulness": 0.167,
+      "speaker_div_ret": 5,
+      "bert_score": 0.778,
+      "answer_relevancy": 0.799,
+      "context_precision": 1.0
+    }
+  },
+  "16": {
+    "question": "What arguments did MPs make about the Single Market and UK membership?",
+    "hop_group": "1-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 0.983,
+      "faithfulness": 0.25,
+      "speaker_div_ret": 5,
+      "bert_score": 0.808,
+      "answer_relevancy": 0.885,
+      "context_precision": 1.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.769,
+      "answer_relevancy": 0.804,
+      "context_precision": 1.0
+    }
+  },
+  "17": {
+    "question": "What was Boris Johnson's publicly stated position on Brexit in parliamentary debates?",
+    "hop_group": "1-hop",
+    "naive": {
+      "mrr": 0.5,
+      "ndcg_5": 0.712,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 5,
+      "bert_score": 0.803,
+      "answer_relevancy": 0.828,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 0.5,
+      "ndcg_5": 0.761,
+      "faithfulness": 0.143,
+      "speaker_div_ret": 5,
+      "bert_score": 0.792,
+      "answer_relevancy": 0.834,
+      "context_precision": 0.0
+    }
+  },
+  "18": {
+    "question": "How did MPs define freedom of movement and what concerns did they raise about ending it?",
+    "hop_group": "1-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 0.905,
+      "faithfulness": 0.167,
+      "speaker_div_ret": 5,
+      "bert_score": 0.828,
+      "answer_relevancy": 0.773,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 0.983,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.795,
+      "answer_relevancy": 0.759,
+      "context_precision": 0.0
+    }
+  },
+  "19": {
+    "question": "What were the meaningful vote debates and what outcomes did they produce?",
+    "hop_group": "1-hop",
+    "naive": {
+      "mrr": 0.25,
+      "ndcg_5": 0.501,
+      "faithfulness": 0.571,
+      "speaker_div_ret": 4,
+      "bert_score": 0.797,
+      "answer_relevancy": 0.597,
+      "context_precision": 0.583
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.222,
+      "speaker_div_ret": 5,
+      "bert_score": 0.792,
+      "answer_relevancy": 0.586,
+      "context_precision": 1.0
+    }
+  },
+  "20": {
+    "question": "What was Jeremy Corbyn's stated position on Brexit in the House of Commons?",
+    "hop_group": "1-hop",
+    "naive": {
+      "mrr": 0.333,
+      "ndcg_5": 0.618,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 5,
+      "bert_score": 0.806,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 0.25,
+      "ndcg_5": 0.501,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 5,
+      "bert_score": 0.803,
+      "answer_relevancy": 0.823,
+      "context_precision": 0.0
+    }
+  },
+  "21": {
+    "question": "What was the transition period and how was it debated in Parliament?",
+    "hop_group": "1-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.167,
+      "speaker_div_ret": 3,
+      "bert_score": 0.783,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.7
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.25,
+      "speaker_div_ret": 5,
+      "bert_score": 0.802,
+      "answer_relevancy": 0.664,
+      "context_precision": 0.867
+    }
+  },
+  "22": {
+    "question": "How did MPs refer to the European Council's role in the Brexit negotiations?",
+    "hop_group": "1-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 0.905,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 4,
+      "bert_score": 0.795,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 0.853,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 5,
+      "bert_score": 0.816,
+      "answer_relevancy": 0.0,
+      "context_precision": 1.0
+    }
+  },
+  "23": {
+    "question": "How did the SNP and Plaid Cymru differ in their approaches to opposing Brexit?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 0.333,
+      "ndcg_5": 0.618,
+      "faithfulness": 0.3,
+      "speaker_div_ret": 3,
+      "bert_score": 0.839,
+      "answer_relevancy": 0.786,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 0.25,
+      "ndcg_5": 0.431,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 5,
+      "bert_score": 0.759,
+      "answer_relevancy": 0.283,
+      "context_precision": 0.0
+    }
+  },
+  "24": {
+    "question": "How did Conservative Remainers and Conservative Leavers disagree in parliamentary debates?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 0.333,
+      "ndcg_5": 0.618,
+      "faithfulness": 0.167,
+      "speaker_div_ret": 4,
+      "bert_score": 0.808,
+      "answer_relevancy": 0.791,
+      "context_precision": 1.0
+    },
+    "graphrag": {
+      "mrr": 0.5,
+      "ndcg_5": 0.68,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.818,
+      "answer_relevancy": 0.41,
+      "context_precision": 0.5
+    }
+  },
+  "25": {
+    "question": "How did the Liberal Democrats' Brexit position compare to the Labour Party's approach?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 0.25,
+      "ndcg_5": 0.501,
+      "faithfulness": 0.333,
+      "speaker_div_ret": 3,
+      "bert_score": 0.816,
+      "answer_relevancy": 0.843,
+      "context_precision": 1.0
+    },
+    "graphrag": {
+      "mrr": 0.5,
+      "ndcg_5": 0.651,
+      "faithfulness": 0.417,
+      "speaker_div_ret": 5,
+      "bert_score": 0.809,
+      "answer_relevancy": 0.918,
+      "context_precision": 0.7
+    }
+  },
+  "26": {
+    "question": "How did the DUP and Conservative Party disagree over the Northern Ireland protocol?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 0.25,
+      "ndcg_5": 0.501,
+      "faithfulness": 0.182,
+      "speaker_div_ret": 4,
+      "bert_score": 0.783,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 0.333,
+      "ndcg_5": 0.571,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.802,
+      "answer_relevancy": 0.964,
+      "context_precision": 0.0
+    }
+  },
+  "27": {
+    "question": "How did parliamentary debates about immigration change between 2016 and 2018?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.167,
+      "speaker_div_ret": 4,
+      "bert_score": 0.779,
+      "answer_relevancy": 0.449,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 0.5,
+      "ndcg_5": 0.712,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.754,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0
+    }
+  },
+  "28": {
+    "question": "How did Scottish Parliament concerns differ from Westminster's handling of Brexit?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.25,
+      "speaker_div_ret": 4,
+      "bert_score": 0.79,
+      "answer_relevancy": 0.0,
+      "context_precision": 1.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 0.983,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.746,
+      "answer_relevancy": 0.222,
+      "context_precision": 1.0
+    }
+  },
+  "29": {
+    "question": "How did Boris Johnson's Brexit position contrast with the official government line under Theresa May?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 0.333,
+      "ndcg_5": 0.618,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 5,
+      "bert_score": 0.81,
+      "answer_relevancy": 1.0,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 0.333,
+      "ndcg_5": 0.618,
+      "faithfulness": 0.111,
+      "speaker_div_ret": 5,
+      "bert_score": 0.807,
+      "answer_relevancy": 0.805,
+      "context_precision": 1.0
+    }
+  },
+  "30": {
+    "question": "How did backbench Labour MPs differ from the Labour frontbench on a second referendum?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 0.333,
+      "ndcg_5": 0.618,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 4,
+      "bert_score": 0.822,
+      "answer_relevancy": 0.641,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 0.333,
+      "ndcg_5": 0.5,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 5,
+      "bert_score": 0.801,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0
+    }
+  },
+  "31": {
+    "question": "How did Conservative and Labour MPs differ in their concerns about business impacts of Brexit?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 0.956,
+      "faithfulness": 0.091,
+      "speaker_div_ret": 4,
+      "bert_score": 0.831,
+      "answer_relevancy": 0.858,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 0.983,
+      "faithfulness": 0.091,
+      "speaker_div_ret": 5,
+      "bert_score": 0.811,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0
+    }
+  },
+  "32": {
+    "question": "How did MPs representing Leave-voting constituencies differ from those in Remain-voting areas?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.2,
+      "speaker_div_ret": 5,
+      "bert_score": 0.812,
+      "answer_relevancy": 0.833,
+      "context_precision": 1.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.25,
+      "speaker_div_ret": 5,
+      "bert_score": 0.792,
+      "answer_relevancy": 0.479,
+      "context_precision": 1.0
+    }
+  },
+  "33": {
+    "question": "How did the SNP and Liberal Democrats differ in their support for a People's Vote?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 0.333,
+      "ndcg_5": 0.618,
+      "faithfulness": 0.2,
+      "speaker_div_ret": 4,
+      "bert_score": 0.8,
+      "answer_relevancy": 0.902,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 0.333,
+      "ndcg_5": 0.571,
+      "faithfulness": 0.1,
+      "speaker_div_ret": 5,
+      "bert_score": 0.792,
+      "answer_relevancy": 0.549,
+      "context_precision": 0.0
+    }
+  },
+  "34": {
+    "question": "How did Theresa May's approach to Brexit negotiations differ from Boris Johnson's strategy?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 0.5,
+      "ndcg_5": 0.733,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 3,
+      "bert_score": 0.774,
+      "answer_relevancy": 0.773,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 0.333,
+      "ndcg_5": 0.544,
+      "faithfulness": 0.2,
+      "speaker_div_ret": 5,
+      "bert_score": 0.789,
+      "answer_relevancy": 0.972,
+      "context_precision": 0.25
+    }
+  },
+  "35": {
+    "question": "How did Northern Irish MPs and English MPs differ in their positions on the backstop?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 0.5,
+      "ndcg_5": 0.712,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 3,
+      "bert_score": 0.747,
+      "answer_relevancy": 0.887,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 0.906,
+      "faithfulness": 0.25,
+      "speaker_div_ret": 5,
+      "bert_score": 0.749,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0
+    }
+  },
+  "36": {
+    "question": "What were the reasons given for Cabinet resignations over Brexit policy?",
+    "hop_group": "2-hop",
+    "naive": {
+      "mrr": 0.0,
+      "ndcg_5": 0.0,
+      "faithfulness": 0.111,
+      "speaker_div_ret": 5,
+      "bert_score": 0.767,
+      "answer_relevancy": 0.904,
+      "context_precision": 0.679
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.25,
+      "speaker_div_ret": 5,
+      "bert_score": 0.78,
+      "answer_relevancy": 0.943,
+      "context_precision": 0.2
+    }
+  },
+  "37": {
+    "question": "How did cross-party support for a second referendum evolve between 2016 and 2019?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 0.956,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 3,
+      "bert_score": 0.786,
+      "answer_relevancy": 0.863,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 5,
+      "bert_score": 0.77,
+      "answer_relevancy": 0.617,
+      "context_precision": 0.7
+    }
+  },
+  "38": {
+    "question": "How did economic arguments about Brexit shift across parties between 2017 and 2019?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 0.85,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 4,
+      "bert_score": 0.757,
+      "answer_relevancy": 0.776,
+      "context_precision": 1.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.167,
+      "speaker_div_ret": 5,
+      "bert_score": 0.78,
+      "answer_relevancy": 0.828,
+      "context_precision": 1.0
+    }
+  },
+  "39": {
+    "question": "How did different parties respond to each of the three meaningful votes on Theresa May's deal?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 0.25,
+      "ndcg_5": 0.431,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 4,
+      "bert_score": 0.74,
+      "answer_relevancy": 1.0,
+      "context_precision": 0.25
+    },
+    "graphrag": {
+      "mrr": 0.25,
+      "ndcg_5": 0.431,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 5,
+      "bert_score": 0.749,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.804
+    }
+  },
+  "40": {
+    "question": "How did Conservative, Labour and SNP MPs address NHS and public services in Brexit debates?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 4,
+      "bert_score": 0.808,
+      "answer_relevancy": 0.633,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.167,
+      "speaker_div_ret": 5,
+      "bert_score": 0.793,
+      "answer_relevancy": 0.913,
+      "context_precision": 0.2
+    }
+  },
+  "41": {
+    "question": "How did parliamentary positions on customs arrangements evolve across the Brexit negotiation period?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 0.5,
+      "ndcg_5": 0.761,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 5,
+      "bert_score": 0.809,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.867
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.726,
+      "answer_relevancy": 0.68,
+      "context_precision": 0.25
+    }
+  },
+  "42": {
+    "question": "How did devolved nations argue they were being marginalised in Brexit negotiations?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 0.25,
+      "ndcg_5": 0.501,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 4,
+      "bert_score": 0.823,
+      "answer_relevancy": 0.431,
+      "context_precision": 1.0
+    },
+    "graphrag": {
+      "mrr": 0.5,
+      "ndcg_5": 0.651,
+      "faithfulness": 0.167,
+      "speaker_div_ret": 5,
+      "bert_score": 0.791,
+      "answer_relevancy": 0.443,
+      "context_precision": 1.0
+    }
+  },
+  "43": {
+    "question": "How did pro-Leave and pro-Remain MPs argue differently about post-Brexit trade deals?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 4,
+      "bert_score": 0.814,
+      "answer_relevancy": 0.417,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.167,
+      "speaker_div_ret": 5,
+      "bert_score": 0.791,
+      "answer_relevancy": 0.516,
+      "context_precision": 0.0
+    }
+  },
+  "44": {
+    "question": "How did different parties interpret the 2016 referendum result and its mandate?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.182,
+      "speaker_div_ret": 3,
+      "bert_score": 0.807,
+      "answer_relevancy": 0.738,
+      "context_precision": 1.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 5,
+      "bert_score": 0.801,
+      "answer_relevancy": 0.344,
+      "context_precision": 1.0
+    }
+  },
+  "45": {
+    "question": "How did MPs link freedom of movement, national sovereignty, and economic concerns together?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 0.905,
+      "faithfulness": 0.25,
+      "speaker_div_ret": 5,
+      "bert_score": 0.79,
+      "answer_relevancy": 0.884,
+      "context_precision": 1.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 0.906,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 4,
+      "bert_score": 0.765,
+      "answer_relevancy": 0.922,
+      "context_precision": 1.0
+    }
+  },
+  "46": {
+    "question": "How did the concept of parliamentary sovereignty evolve in debates from 2016 to 2019?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 0.905,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 4,
+      "bert_score": 0.803,
+      "answer_relevancy": 0.794,
+      "context_precision": 0.7
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 0.905,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 5,
+      "bert_score": 0.806,
+      "answer_relevancy": 0.724,
+      "context_precision": 0.7
+    }
+  },
+  "47": {
+    "question": "How did SNP, Labour and Conservative MPs differ on the risks of a no-deal Brexit?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.167,
+      "speaker_div_ret": 4,
+      "bert_score": 0.81,
+      "answer_relevancy": 0.621,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.167,
+      "speaker_div_ret": 5,
+      "bert_score": 0.783,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0
+    }
+  },
+  "48": {
+    "question": "How did opposition parties coordinate their strategy to block a no-deal Brexit?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 4,
+      "bert_score": 0.764,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 0.983,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.791,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0
+    }
+  },
+  "49": {
+    "question": "How did ERG arguments intensify as the meaningful vote dates approached?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 0.853,
+      "faithfulness": 0.25,
+      "speaker_div_ret": 4,
+      "bert_score": 0.79,
+      "answer_relevancy": 0.971,
+      "context_precision": 1.0
+    },
+    "graphrag": {
+      "mrr": 1.0,
+      "ndcg_5": 0.905,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.748,
+      "answer_relevancy": 0.0,
+      "context_precision": 1.0
+    }
+  },
+  "50": {
+    "question": "How did MPs across parties connect Brexit to the Northern Ireland peace process over time?",
+    "hop_group": "3-hop",
+    "naive": {
+      "mrr": 1.0,
+      "ndcg_5": 1.0,
+      "faithfulness": 0.0,
+      "speaker_div_ret": 5,
+      "bert_score": 0.777,
+      "answer_relevancy": 0.798,
+      "context_precision": 0.2
+    },
+    "graphrag": {
+      "mrr": 0.5,
+      "ndcg_5": 0.733,
+      "faithfulness": 0.083,
+      "speaker_div_ret": 5,
+      "bert_score": 0.797,
+      "answer_relevancy": 0.657,
+      "context_precision": 0.5
+    }
+  }
+}

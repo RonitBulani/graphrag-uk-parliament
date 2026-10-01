@@ -1,0 +1,8 @@
+metric,hybrid_rag,graphrag,difference
+mrr,0.7249,0.7623,0.0374
+ndcg_5,0.8013,0.8179,0.0166
+bert_score,0.799,0.7863,-0.0127
+faithfulness,0.1138,0.1223,0.0085
+answer_relevancy,0.59,0.5384,-0.0517
+context_precision,0.4464,0.4622,0.0157
+speaker_div_ret,4.14,4.98,0.84
