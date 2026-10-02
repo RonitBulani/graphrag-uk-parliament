@@ -132,7 +132,7 @@ More detail is in [`results/RESULTS.md`](results/RESULTS.md).
 ## Repository structure
 
 ```text
-graphrag-parliamentary-reasoning/
+graphrag-uk-parliament/
 ├── src/
 │   ├── 01_data_loading.py
 │   ├── 02_vectorisation.py
