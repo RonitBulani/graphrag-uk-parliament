@@ -105,8 +105,8 @@ fig.suptitle("Retrieval Quality by Reasoning Complexity  (N=50 questions)",
              fontsize=13, fontweight="bold", y=1.02)
 
 for ax, (metric, title, ylabel) in zip(axes, [
-    ("mrr",    "MRR  (rank of first relevant chunk)",    "Score (0–1)"),
-    ("ndcg_5", "nDCG@5  (rank-weighted precision)",      "Score (0–1)"),
+    ("mrr",    "MRR  (first target-entity chunk)",    "Score (0–1)"),
+    ("ndcg_5", "nDCG@5  (target-entity relevance)",      "Score (0–1)"),
 ]):
     annotated_bars(ax, hop_avg(metric, "naive"), hop_avg(metric, "graphrag"))
     ax.set_title(title, fontsize=10, fontweight="bold", pad=6)

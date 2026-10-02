@@ -50,3 +50,14 @@ ollama pull phi3:mini
 The full pipeline is not intended to be a quick unit-test-sized demo. Embedding more than 200k chunks and evaluating both retrieval systems across 50 questions takes substantially longer than running the small sample data.
 
 For a quick inspection of the implementation, start with the source code, `data/questions.json`, `results/aggregate_metrics.csv`, and the figures rather than rebuilding the full corpus.
+
+
+## Evaluation interpretation
+
+The committed MRR and nDCG@5 values depend on the target speaker/party sets
+stored in the generated pooled-reference evaluation metadata. They should be
+reproduced with the same question file and pooled-reference procedure.
+
+Because these targets are not independent human passage-relevance labels,
+re-running reference generation with different model outputs may change both
+the reference answers and the derived entity targets.

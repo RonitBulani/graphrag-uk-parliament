@@ -1,4 +1,4 @@
-# GraphRAG for Multi-Hop Reasoning over UK Parliamentary Speech
+# GraphRAG for Multi-Hop Parliamentary Reasoning
 
 A solo MSc Data Science project exploring whether graph-guided retrieval improves question answering over UK parliamentary Brexit speeches when the question requires evidence across several speakers, parties, topics or time periods.
 
@@ -82,9 +82,19 @@ The benchmark contains **50 questions** with explicit reasoning-complexity label
 - **17 two-hop questions**
 - **19 three-hop questions**
 
-The evaluation uses MRR, nDCG@5, BERTScore, NLI-based faithfulness, RAGAS answer relevancy, RAGAS context precision and retrieved-speaker diversity.
+The evaluation uses MRR, nDCG@5, BERTScore, NLI-based faithfulness,
+RAGAS answer relevancy, RAGAS context precision and retrieved-speaker
+diversity.
 
-Reference answers were produced using a **TREC-style pooled-reference procedure**: evidence retrieved by both systems was pooled before a reference answer was generated. I therefore describe these as *pooled references*, not independently human-annotated ground truth.
+For **MRR and nDCG@5**, relevance is an **entity-based proxy**: a retrieved
+chunk is counted as relevant when its speaker or party matches the target
+speaker/party set derived for that question. These are therefore not
+independently human-judged passage-relevance metrics.
+
+Reference answers were produced using a **TREC-style pooled-reference
+procedure**: evidence retrieved by both systems was pooled before a reference
+answer was generated. I therefore describe these as *pooled references*, not
+independently human-annotated ground truth.
 
 ## Results
 
@@ -100,9 +110,20 @@ Across all 50 questions:
 | Context precision | 0.446 | **0.462** | +0.016 |
 | Speaker diversity | 4.14 | **4.98** | +0.84 MPs |
 
-GraphRAG was numerically higher on **5 of the 7 metrics**. The clearest statistically supported difference was speaker diversity, where the increase of **0.84 unique MPs per question** was significant under a paired Wilcoxon signed-rank test (`p < 0.001`).
+GraphRAG was numerically higher on **5 of the 7 metrics**. The clearest
+GraphRAG-side statistically supported difference was speaker diversity, where
+the increase of **0.84 unique MPs per question** was significant under a paired
+Wilcoxon signed-rank test (`p < 0.001`).
 
-MRR and nDCG@5 also improved on average, including at the 3-hop level, but those paired differences were not statistically significant in this 50-question benchmark. BERTScore and answer relevancy were lower overall, which is a useful reminder that broader structural coverage does not automatically improve every aspect of answer quality.
+The hybrid baseline, however, had the higher **BERTScore** (**0.799 vs 0.786**),
+and that paired difference was also statistically significant in this
+experiment (`p ≈ 0.008`).
+
+MRR and nDCG@5 improved on average, including at the 3-hop level, but those
+paired differences were not statistically significant in this 50-question
+benchmark. Answer relevancy was also lower for GraphRAG. Together, these
+results suggest a trade-off between broader structural coverage and some
+answer-similarity/relevancy measures rather than a uniform improvement.
 
 ![Metric distributions](figures/fig6_distributions.png)
 
@@ -111,7 +132,7 @@ More detail is in [`results/RESULTS.md`](results/RESULTS.md).
 ## Repository structure
 
 ```text
-graphrag-uk-parliament/
+graphrag-parliamentary-reasoning/
 ├── src/
 │   ├── 01_data_loading.py
 │   ├── 02_vectorisation.py
@@ -193,7 +214,7 @@ Some stages are computationally expensive. Vectorisation, graph construction and
 
 There are several obvious extensions rather than pretending this experiment settles the GraphRAG question:
 
-- use independently human-annotated relevance judgements for a stronger evaluation target
+- replace the entity-based MRR/nDCG relevance proxy with independently human-annotated passage-relevance judgements
 - expand the question set and run repeated evaluation with additional LLM judges
 - ablate individual graph components to measure which ones actually drive the gains
 - replace lightweight sentiment proxies with task-specific stance representations

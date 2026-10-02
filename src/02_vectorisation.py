@@ -204,8 +204,10 @@ print(f"  model={EMBEDDING_MODEL}, chunk_size={CHUNK_SIZE}, overlap={CHUNK_OVERL
 # =============================================================================
 
 print(f"\nQuick test -- searching for 'Article 50 withdrawal'")
+test_query = "Article 50 withdrawal from the European Union"
+test_embedding = model.encode([test_query], show_progress_bar=False).tolist()
 test_results = collection.query(
-    query_texts=["Article 50 withdrawal from the European Union"],
+    query_embeddings=test_embedding,
     n_results=3,
 )
 for i, doc in enumerate(test_results["documents"][0]):

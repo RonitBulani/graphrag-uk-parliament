@@ -2,6 +2,17 @@
 
 This folder contains the compact evaluation artefacts used in the public repository.
 
+## Retrieval-metric definition
+
+MRR and nDCG@5 use an **entity-based relevance proxy** in this experiment.
+For each question, target speakers and parties are derived from the pooled
+reference/evaluation metadata. A retrieved chunk is treated as relevant when
+its speaker or party matches that target set.
+
+These scores therefore measure how highly the systems retrieve chunks
+associated with expected entities. They are **not** based on independently
+human-annotated passage-level relevance judgements.
+
 ## Overall comparison
 
 | Metric | Hybrid RAG | GraphRAG | Difference |
@@ -14,7 +25,7 @@ This folder contains the compact evaluation artefacts used in the public reposit
 | Context precision | 0.4464 | **0.4622** | +0.0157 |
 | Speaker diversity | 4.1400 | **4.9800** | +0.8400 |
 
-GraphRAG was numerically higher on five metrics. The largest and most consistent gain was retrieved-speaker diversity.
+GraphRAG was numerically higher on five metrics. The largest and most consistent GraphRAG-side gain was retrieved-speaker diversity. The hybrid baseline was significantly higher on BERTScore in the paired test, so the results do not support a blanket claim that GraphRAG improved answer quality.
 
 ## Paired statistical checks
 

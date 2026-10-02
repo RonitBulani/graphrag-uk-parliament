@@ -166,7 +166,7 @@ def hit_rate(result):
     ret_s = {c["speaker"] for c in result["retrieved_chunks"]}
     return round(sum(1 for t in all_t if t in ret_p or t in ret_s) / len(all_t), 3)
 
-# reciprocal rank of the first retrieved chunk matching a target entity
+# reciprocal rank of the first retrieved chunk matching a target speaker/party
 def mrr(result):
     qid     = result["question_id"]
     targets = set(TARGET_ENTITIES.get(qid, {}).get("parties", []) +
@@ -199,7 +199,7 @@ def speaker_citations(result):
     retrieved = {c["speaker"] for c in result["retrieved_chunks"]}
     return len({s for s in retrieved if s.lower() in answer})
 
-# rank-weighted relevance over all 5 retrieved chunks
+# rank-weighted entity-target relevance over the top 5 retrieved chunks
 def ndcg_at_5(result):
     qid     = result["question_id"]
     targets = set(TARGET_ENTITIES.get(qid, {}).get("parties", []) +
@@ -494,8 +494,8 @@ def annotated_bars(ax, x, n_vals, g_vals, ylim=1.2):
 # fig 1: retrieval metrics
 fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 for ax, (metric, title) in zip(axes, [
-    ("mrr",    "MRR (rank of first relevant chunk)"),
-    ("ndcg_5", "nDCG@5 (rank-weighted precision)"),
+    ("mrr",    "MRR (first target-entity chunk)"),
+    ("ndcg_5", "nDCG@5 (target-entity relevance)"),
 ]):
     annotated_bars(ax, x, hop_avg(metric, "naive"), hop_avg(metric, "graphrag"))
     ax.set_title(title); ax.set_ylabel("Score (0-1)")

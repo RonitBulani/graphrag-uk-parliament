@@ -51,6 +51,17 @@ Metrics cover:
 - RAGAS context precision
 - retrieved speaker diversity
 
+### Retrieval relevance proxy
+
+MRR and nDCG@5 do not use independently human-labelled passage relevance.
+Instead, each question has a target set of speakers and parties derived from
+the pooled-reference evaluation metadata. A retrieved chunk receives binary
+relevance when its speaker or party belongs to that target set.
+
+This makes MRR and nDCG useful for comparing entity-oriented retrieval in this
+experiment, but they should be interpreted as **entity-target retrieval
+metrics**, not as standard human-judged passage-relevance benchmarks.
+
 ### Pooled references
 
 Reference answers are generated from the deduplicated union of evidence retrieved by the two systems. This follows the idea of TREC-style pooling to avoid constructing a reference from only one system's evidence.
