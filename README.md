@@ -191,7 +191,7 @@ The current application has undergone the following checks:
 | Check | Observed result |
 |---|---|
 | Backend structural acceptance suite | 8/8 passed |
-| FastAPI contract tests | 3/3 passed |
+| FastAPI contract tests | 5/5 passed |
 | Conversation history interactions | 6/6 passed |
 | Export interactions | 5/5 passed |
 | Frontend ESLint | Passed without reported issues |
@@ -211,6 +211,8 @@ graphrag-uk-parliament/
 ├── app/                # FastAPI and grounded retrieval service
 ├── src/                # Original research pipeline and GraphRAG engines
 ├── frontend/           # React/Vite research interface
+├── docker/             # Backend image and runtime dependencies
+├── compose.yaml        # Local Docker Compose deployment
 ├── tests/              # Maintained API contract tests
 ├── data/               # Public sample, benchmark and data instructions
 ├── results/            # Curated original evaluation results
@@ -223,13 +225,16 @@ graphrag-uk-parliament/
 └── README.md
 ```
 
-## CI and demo
+## CI, Docker and application preview
 
 [![ParliamentAI CI](https://github.com/RonitBulani/graphrag-uk-parliament/actions/workflows/ci.yml/badge.svg)](https://github.com/RonitBulani/graphrag-uk-parliament/actions/workflows/ci.yml)
+[![ParliamentAI Docker build](https://github.com/RonitBulani/graphrag-uk-parliament/actions/workflows/docker-build.yml/badge.svg)](https://github.com/RonitBulani/graphrag-uk-parliament/actions/workflows/docker-build.yml)
 
-GitHub Actions runs lightweight FastAPI contract tests, frontend lint and build checks, and a production-dependency audit. These checks intentionally do **not** download the full parliamentary corpus or test historical answer accuracy.
+GitHub Actions checks Python syntax and five lightweight FastAPI contract tests, React lint and production build, a production-dependency audit, and reproducible builds of the backend and frontend Docker images. The Docker workflow runs when relevant application or Docker files change. These jobs deliberately do **not** download the entire speech corpus, start the full retrieval service or independently verify historical accuracy.
 
-For a real screenshot checklist and a short video walkthrough script, see the [Demo Guide](docs/DEMO.md). Screenshots and a recording will be linked when captured from the running local application.
+The local Docker deployment was built and manually tested with the full retrieval artifacts. The frontend loaded, real GraphRAG requests returned responses and speech evidence could be inspected. The complete dataset and generated retrieval indexes are **not** included in the repository or built into the images.
+
+See the [authentic screenshot gallery](docs/SCREENSHOT_GALLERY.md), [local demonstration guide](docs/DEMO.md) and [Docker setup instructions](DOCKER_SETUP.md). No publicly hosted demo or video recording is claimed.
 
 ## Running ParliamentAI locally
 
@@ -275,6 +280,29 @@ npm.cmd run dev
 Open `http://127.0.0.1:5173/`.
 
 The interactive frontend uses the `/graphrag/ask` endpoint.
+
+### Alternative: run with Docker Compose
+
+Docker runs the React/Nginx frontend and FastAPI backend in separate containers, with the original research data excluded from images. The complete ChromaDB vector store, knowledge graph and metadata must already exist locally; copying them into the Docker runtime directory is a separate, one-time preparation step.
+
+From the repository root, stop any local FastAPI process accessing the original ChromaDB database. If `data/docker_runtime` does not already exist:
+
+```powershell
+.\scripts\prepare_docker_data.ps1
+```
+
+Then run:
+
+```powershell
+docker compose config --quiet
+docker compose build
+docker compose up -d
+docker compose ps
+```
+
+Once the backend reports healthy, open `http://localhost:8080`. The backend health endpoint is `http://localhost:8080/backend/health`. To stop without deleting the model cache, run `docker compose down`. See [Docker setup](DOCKER_SETUP.md) for prerequisites, data protection and troubleshooting.
+
+This is a **local-only** setup: port 8080 is bound to loopback, and the Docker images are built locally or in CI rather than published to a container registry.
 
 ### Frontend checks
 
