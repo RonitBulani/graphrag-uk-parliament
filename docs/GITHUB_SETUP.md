@@ -1,41 +1,50 @@
-# Publishing this project to GitHub
+# Maintaining the published ParliamentAI repository
 
-This folder is already structured as a GitHub repository. You do not need to upload files one by one.
+The public repository is already published at **[RonitBulani/graphrag-uk-parliament](https://github.com/RonitBulani/graphrag-uk-parliament)**. Do **not** initialise a new repository or follow an initial-publication workflow for the existing project.
 
-## Option A — GitHub Desktop (easiest if you are new to Git)
+## Clone or update safely
 
-1. Extract the repository ZIP to a permanent folder on your computer.
-2. Open GitHub Desktop.
-3. Choose **File -> Add local repository** and select the extracted folder.
-4. If GitHub Desktop says the folder is not yet a Git repository, choose **Create a repository here**.
-5. Use the repository name `graphrag-parliamentary-reasoning`.
-6. Keep the repository public if you want recruiters to see it.
-7. Make an initial commit with a message such as `Initial portfolio release`.
-8. Click **Publish repository**.
+To clone onto a new computer:
 
-Do not tick an option that adds another README, `.gitignore` or licence if GitHub Desktop offers one; those files are already included.
-
-## Option B — command line
-
-From inside the extracted folder:
-
-```bash
-git init
-git add .
-git commit -m "Initial portfolio release"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/graphrag-parliamentary-reasoning.git
-git push -u origin main
+```powershell
+git clone https://github.com/RonitBulani/graphrag-uk-parliament.git
+cd graphrag-uk-parliament
 ```
 
-Create the empty repository on GitHub before the `git remote add` step. Do not initialise the GitHub-side repository with a README because this folder already contains one.
+To inspect an existing local clone before making changes:
 
-## After publishing
+```powershell
+git status -sb
+git remote -v
+git branch --show-current
+```
 
-On the GitHub repository page:
+If you have uncommitted changes, review and preserve them before switching branches or pulling. Do not run destructive reset, clean or forced-push commands as a shortcut.
 
-1. Add the description: `Graph-guided RAG vs hybrid RAG for multi-hop reasoning over UK parliamentary speech.`
-2. Add topics such as `graphrag`, `rag`, `nlp`, `information-retrieval`, `knowledge-graph`, `python`, `llm`, `networkx`, `chromadb`.
-3. Pin the repository on your profile.
-4. Check that the two figures embedded near the top of the README render correctly.
-5. Do not upload the full source corpus or local model/vector-store directories that are excluded by `.gitignore`.
+## Propose updates through a pull request
+
+Start with a clean working tree and an up-to-date `main` branch:
+
+```powershell
+git switch main
+git pull --ff-only origin main
+git switch -c docs/describe-your-update
+```
+
+Edit the relevant files, review `git diff`, and run appropriate checks. Then commit and push your branch:
+
+```powershell
+git add path/to/changed-file.md
+git commit -m "docs: describe the update"
+git push -u origin docs/describe-your-update
+```
+
+Open a pull request targeting `main`. Inspect the file diff and GitHub Actions results before merging. Replace the example branch and path names with your actual changes.
+
+## Repository hygiene
+
+- Keep `data/vectorstore/`, generated graph files, `archive.zip`, model caches, credentials and local-only data out of commits (see [`.gitignore`](../.gitignore)).
+- Separate documentation changes from application or research-method changes where possible.
+- Keep claims about the **original 50-question benchmark** distinct from verification of the **current interactive application**.
+- Do not publish a public demo URL, video recording or reproducibility claim unless the corresponding asset or workflow has actually been verified.
+- Consult [README](../README.md), [Architecture](ARCHITECTURE.md), [Reproducibility](REPRODUCIBILITY.md) and [Docker setup](../DOCKER_SETUP.md) before preparing a release.

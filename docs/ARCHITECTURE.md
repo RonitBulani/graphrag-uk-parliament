@@ -43,7 +43,7 @@ ChromaDB collection          |
          GraphRAG retrieval
 ```
 
-The source data-loading script filters records from 2015-01-01 through 2020-12-31.
+The source data-loading script uses a 2015-01-01 through 2020-12-31 **filter window**; the published ParlSpeech V2 UK source data does not imply that the filtered corpus contains 2020 speeches. The interactive API declares its supported period as 2015–2019 (`DATA_START_YEAR` and `DATA_END_YEAR` in `app/graphrag_service.py`).
 
 The full generated data artifacts are intentionally excluded from the public Git repository.
 
