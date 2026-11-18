@@ -38,7 +38,7 @@ The original benchmark and interactive application are related but distinct: the
 - 50 evaluation questions across three reasoning-complexity levels
 - Comparison of hybrid RAG with graph-guided retrieval
 
-The data-loading script accepts House of Commons records from 2015 through 2020. The current ParliamentAI interface is presented as a Brexit debate explorer focused on 2015–2019.
+The preprocessing script is configured to accept records dated 2015-01-01 through 2020-12-31; this is a **filtering window, not a claim that source records exist in every year**. The available ParlSpeech V2 UK corpus extends to 2019, and the interactive ParliamentAI service explicitly supports questions about 2015–2019. See [data provenance and preparation](data/README.md) for the difference between the published source format and the prepared CSV archive expected by this repository.
 
 ## ParliamentAI application
 
