@@ -1,0 +1,61 @@
+name: ParliamentAI Docker build
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/docker-build.yml"
+      - ".dockerignore"
+      - "compose.yaml"
+      - "docker/**"
+      - "app/**"
+      - "src/**"
+      - "frontend/**"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/docker-build.yml"
+      - ".dockerignore"
+      - "compose.yaml"
+      - "docker/**"
+      - "app/**"
+      - "src/**"
+      - "frontend/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build both Docker images
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose configuration
+        run: docker compose config --quiet
+
+      # Builds use only tracked source code; the research corpus and ChromaDB
+      # index are excluded from the build context and are not required here.
+      - name: Build FastAPI backend image
+        run: docker compose build backend
+
+      - name: Build React/Nginx frontend image
+        run: docker compose build frontend
+
+      - name: Verify generated images
+        run: |
+          docker image inspect parliamentai-backend:latest >/dev/null
+          docker image inspect parliamentai-frontend:latest >/dev/null
+          docker image ls --format 'table {{.Repository}}\t{{.Tag}}\t{{.Size}}'
+
+      # Running the GraphRAG endpoint requires the separate, multi-GB local
+      # retrieval dataset, so runtime tests remain a separate deployment check.
