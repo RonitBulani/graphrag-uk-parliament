@@ -213,6 +213,14 @@ graphrag-uk-parliament/
 └── README.md
 ```
 
+## CI and demo
+
+[![ParliamentAI CI](https://github.com/RonitBulani/graphrag-uk-parliament/actions/workflows/ci.yml/badge.svg)](https://github.com/RonitBulani/graphrag-uk-parliament/actions/workflows/ci.yml)
+
+GitHub Actions runs lightweight FastAPI contract tests, frontend lint and build checks, and a production-dependency audit. These checks intentionally do **not** download the full parliamentary corpus or test historical answer accuracy.
+
+For a real screenshot checklist and a short video walkthrough script, see the [Demo Guide](docs/DEMO.md). Screenshots and a recording will be linked when captured from the running local application.
+
 ## Running ParliamentAI locally
 
 ### Requirements
