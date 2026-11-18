@@ -1,0 +1,10 @@
+# Minimal runtime dependencies for the active FastAPI GraphRAG service.
+# The original offline evaluation uses the separate root requirements.txt.
+fastapi==0.162.0
+uvicorn==0.54.0
+chromadb==1.5.8
+sentence-transformers==5.4.1
+networkx==3.6.1
+numpy==2.4.4
+scikit-learn==1.8.0
+openai==2.32.0

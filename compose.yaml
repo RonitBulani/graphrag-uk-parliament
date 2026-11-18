@@ -1,0 +1,45 @@
+name: parliamentai
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    environment:
+      GRAPHRAG_ENABLE_R2: "0"
+      GRAPHRAG_GENERATION_MODE: "extractive"
+      GRAPHRAG_NLI_ENABLED: "0"
+      TOKENIZERS_PARALLELISM: "false"
+      HF_HOME: /models/hf
+    volumes:
+      # Separate working copy; the existing local research index stays untouched.
+      - type: bind
+        source: ./data/docker_runtime
+        target: /app/data
+      # Reuse downloaded embedding/reranker models across container restarts.
+      - type: volume
+        source: model_cache
+        target: /models/hf
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)"
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  model_cache:
