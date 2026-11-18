@@ -218,11 +218,13 @@ From the repository root:
 python -m pytest -q tests/test_main.py
 ```
 
-The current three tests cover:
+The current five tests cover:
 
 1. The health endpoint
 2. Registration of the `/graphrag/ask` POST route
 3. The expected answer-and-evidence response contract using a mocked service
+4. Rejection of an empty or whitespace-only question
+5. Trimming surrounding whitespace before passing a question to the service
 
 These tests passed in the working environment.
 
@@ -282,7 +284,7 @@ Clearing browser storage can remove local conversation history.
 ## 14. Known limitations
 
 - Full data and generated indexes must be recreated or supplied separately.
-- The current project has been verified primarily in a local Windows environment.
+- The project has been verified locally on Windows, including a two-container Docker Compose build and functioning GraphRAG requests. See [Docker setup](../DOCKER_SETUP.md).
 - Structural citation checks do not guarantee historical correctness.
 - Speaker co-participation does not imply direct debate interaction.
 - TextBlob polarity is not a political-stance label.
