@@ -7,6 +7,19 @@ The project began as an MSc Data Science investigation into whether graph-guided
 
 The original benchmark and interactive application are related but distinct: the benchmark evaluates retrieval approaches, while ParliamentAI demonstrates an integrated research workflow.
 
+## At a glance
+
+| Area | What I built or evaluated |
+|---|---|
+| **Data engineering** | Processed 39,423 Brexit-related parliamentary speeches into 201,131 indexed text chunks |
+| **Retrieval and knowledge graphs** | Built a NetworkX graph (1,806 nodes; 42,634 edges), ChromaDB retrieval, hybrid RAG and graph-guided search |
+| **Research evaluation** | Compared both retrieval approaches on 50 multi-hop questions using seven metrics; GraphRAG increased speaker diversity, with mixed results on other metrics |
+| **Full-stack engineering** | Extended the research into a FastAPI + React application with citation-linked evidence, saved conversations, exports, Docker and CI |
+
+**Explore:** [v1.0.0 release](https://github.com/RonitBulani/graphrag-uk-parliament/releases/tag/v1.0.0) · [Architecture](docs/ARCHITECTURE.md) · [Research results](results/RESULTS.md) · [Screenshots](docs/SCREENSHOT_GALLERY.md) · [Local setup](DOCKER_SETUP.md)
+
+**Project status:** A locally tested research prototype, not a public hosted demo. The full dataset/indexes are not included in GitHub, and evidence citations do not independently establish historical accuracy.
+
 ## Application preview
 
 ![ParliamentAI research workspace](docs/screenshots/01-research-workspace.png)
