@@ -7,6 +7,16 @@ The project began as an MSc Data Science investigation into whether graph-guided
 
 The original benchmark and interactive application are related but distinct: the benchmark evaluates retrieval approaches, while ParliamentAI demonstrates an integrated research workflow.
 
+## Application preview
+
+![ParliamentAI research workspace](docs/screenshots/01-research-workspace.png)
+
+| Grounded answer | Source inspection |
+|---|---|
+| ![ParliamentAI cited answer](docs/screenshots/02-grounded-answer.png) | ![Highlighted parliamentary evidence](docs/screenshots/03-source-inspection.png) |
+
+[View the complete screenshot gallery](docs/SCREENSHOT_GALLERY.md)
+
 ## Project overview
 
 | Component | Technology |
