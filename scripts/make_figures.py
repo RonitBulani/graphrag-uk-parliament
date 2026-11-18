@@ -1,15 +1,16 @@
 """
-Generates 7 publication-quality figures for the SCC453 paper.
-Run from project root: python paper/make_figures.py
+Generate seven figures from the existing ParliamentAI research evaluation results.
 
-Outputs:
-  paper/fig1_hop_comparison.png  — MRR + nDCG@5 by hop group
-  paper/fig2_answer_quality.png  — BERTScore + Faithfulness + SpkDiv by hop
-  paper/fig3_ragas.png           — RAGAS AnsRel + CtxPrec by hop
-  paper/fig4_radar.png           — Normalised radar over all 7 metrics
-  paper/fig5_faithfulness.png    — NLI faithfulness per question
-  paper/fig6_distributions.png   — Box plots of MRR/nDCG/SpkDiv with Wilcoxon p-values
-  paper/fig7_mrr_delta.png       — Per-question MRR delta coloured by hop group
+From the repository root, run:
+    python scripts/make_figures.py
+
+Requires results/evaluation_results.json and data/questions.json.
+Writes fig1_hop_comparison.png, fig2_answer_quality.png, fig3_ragas.png,
+fig4_radar.png, fig5_faithfulness.png, fig6_distributions.png, and
+fig7_mrr_delta.png into figures/.
+
+This script visualises the original offline benchmark, not the interactive
+application's API validation or historical-answer accuracy.
 """
 
 import json
