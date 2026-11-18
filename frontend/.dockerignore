@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.vite/
+coverage/
+.env
+.env.*
+.git/
+*.log
+README.md
+src/assets/
