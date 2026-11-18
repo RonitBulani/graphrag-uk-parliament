@@ -1,0 +1,67 @@
+name: ParliamentAI CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend-contract:
+    name: Backend API contract (Python 3.12)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Contract tests stub the GraphRAG service BEFORE importing FastAPI.
+      # The complete corpus, ChromaDB index, ML models and Ollama are not
+      # needed to validate route registration and response behaviour.
+      - name: Install lightweight API test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install fastapi==0.162.0 httpx==0.28.1 pytest==9.2.0
+
+      - name: Check Python syntax
+        run: python -m compileall -q app src tests
+
+      - name: Run API contract tests
+        run: python -m pytest -q tests/test_main.py
+
+  frontend:
+    name: Frontend lint and build (Node 22)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install locked frontend dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
