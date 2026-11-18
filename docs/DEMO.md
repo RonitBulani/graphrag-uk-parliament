@@ -37,8 +37,8 @@ Save screenshots inside `docs/screenshots/` once they have been captured from th
 | `01-research-workspace.png` | Clean main interface and question composer |
 | `02-grounded-answer.png` | Completed answer with numbered evidence citations |
 | `03-source-inspection.png` | A selected citation and the corresponding parliamentary source passage |
-| `04-evidence-filters.png` | Party/year evidence filters applied to a completed answer |
-| `05-history-and-export.png` | Saved conversation history and the export interface |
+| `04-conversation-history.png` | Saved conversation selected with its answer visible |
+| `05-research-export.png` | Markdown, JSON and conversation backup menu |
 
 Use a browser window at approximately 1440 × 900 for desktop screenshots. A second narrow viewport can demonstrate responsive layout if desired.
 
