@@ -58,14 +58,16 @@ Do not blindly upgrade the entire working environment to resolve a single packag
 
 ## 3. Data availability
 
-The original dataset comes from ParlSpeech V2, filtered to Brexit-related UK House of Commons speeches.
+The research source is **ParlSpeech V2** (Rauh and Schwalbach, 2020; [Harvard Dataverse, DOI:10.7910/DVN/L4OAKN](https://doi.org/10.7910/DVN/L4OAKN)). The released UK data are supplied as `Corp_HouseOfCommons_V2.rds`, whereas this repository's preprocessing script expects a separately prepared CSV ZIP archive. The code in this repository does **not** convert the official RDS download into that ZIP. See [data provenance and input contract](../data/README.md).
 
-The preprocessing script uses:
+The preprocessing script is configured with:
 
 ```text
 DATE_START = 2015-01-01
 DATE_END   = 2020-12-31
 ```
+
+These are inclusive filtering bounds, not a claim of 2020 coverage in the ParlSpeech V2 release. The UK source extends to 2019. The current interactive service enforces a separate 2015–2019 supported-question range.
 
 The public repository contains:
 
@@ -86,15 +88,14 @@ A small sample alone is not sufficient to recreate the complete application's re
 
 ## 4. Prepare source data
 
-Obtain the required ParlSpeech V2 source data under its applicable terms.
-
-Place the archive at:
+Obtain and cite the official ParlSpeech V2 UK source dataset (linked above). **Do not rename the official `.rds` file to `.zip`: the formats are different.** Before running the existing preprocessing script, prepare a separate ZIP file named `archive.zip` at the repository root. Its internal entries must be exactly:
 
 ```text
-archive.zip
+df_HoC_2000s.csv
+df_HoC_miniDebate.csv
 ```
 
-The data-loading script expects configured House of Commons CSV files within that archive.
+Each CSV must provide at least `date`, `agenda`, `speechnumber`, `speaker`, `party`, and `text`; the script reads the two CSVs directly from the ZIP, applies its configured keyword/date filters and writes the derived data. **The transformation that produced these specially named CSVs is not supplied here**, so an independent reproduction starting only with the official RDS file is not yet end-to-end. Use the prepared archive only when its provenance and schema have been checked.
 
 Run from the repository root:
 
