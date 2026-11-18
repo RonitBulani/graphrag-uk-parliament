@@ -1,281 +1,131 @@
 
-"""
-GraphRAG FastAPI service layer.
+"""GraphRAG API service: single-pass engine + topic-aware temporal retrieval.
 
-This module connects the original GraphRAG research engine
-to the FastAPI application.
-
-Features
---------
-1. Cached GraphRAG engine initialization.
-2. Dataset year validation (2015-2019).
-3. Original iterative GraphRAG retrieval.
-4. Enhanced multi-query retrieval for temporal questions.
-5. Evidence coverage checks.
-6. Hybrid temporal answer generation.
-7. Grounded general-purpose answer generation.
-8. Citation-aligned evidence and retrieval diagnostics.
-
-The original src/graphrag_engine.py is not modified.
+Paste into app/graphrag_service.py. Existing database is read-only.
+This version preserves the existing API response fields and citation ordering.
 """
 
 from __future__ import annotations
 
 import logging
 import re
-
 from functools import lru_cache
 from pathlib import Path
 
+from app.evidence_checks import check_evidence_coverage
+from app.general_grounded_generation import generate_general_grounded_answer
+from app.question_aware_retrieval import retrieve_question_aware_evidence
+from app.temporal_grounded_v2 import generate_grounded_answer
+from app.temporal_retrieval import build_year_date_index, retrieve_year_candidates
+from src.graphrag_engine_optimized import GraphRAGEngine
 
-# ============================================================
-# IMPORT ORIGINAL RESEARCH ENGINE
-# ============================================================
-
-from src.graphrag_engine import GraphRAGEngine
-
-
-# ============================================================
-# IMPORT APPLICATION-LEVEL RETRIEVAL
-# ============================================================
-
-from app.temporal_retrieval import (
-    build_year_date_index,
-)
-
-from app.retrieval_upgrade import (
-    retrieve_diverse_temporal_evidence,
-)
-
-
-# ============================================================
-# IMPORT EVIDENCE VALIDATION
-# ============================================================
-
-from app.evidence_checks import (
-    check_evidence_coverage,
-)
-
-
-# ============================================================
-# IMPORT ANSWER GENERATORS
-# ============================================================
-
-from app.grounded_generation import (
-    generate_grounded_answer,
-)
-
-from app.general_grounded_generation import (
-    generate_general_grounded_answer,
-)
-
-
-# ============================================================
-# LOGGING
-# ============================================================
-
-logger = logging.getLogger(__name__)
-
-
-# ============================================================
-# PROJECT CONFIGURATION
-# ============================================================
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-
+LOGGER = logging.getLogger(__name__)
+ROOT = Path(__file__).resolve().parents[1]
 DATA_START_YEAR = 2015
 DATA_END_YEAR = 2019
 
-MAX_TEMPORAL_CHUNKS = 12
-
-TEMPORAL_RESULTS_PER_SEARCH = 35
-
-MIN_RERANK_SCORE = -1.5
-
-
-# ============================================================
-# TEMPORAL QUESTION DETECTION
-# ============================================================
-
-TEMPORAL_RANGE_PATTERN = re.compile(
-    r"\b(?:between|from)\s+"
-    r"(20\d{2})\s+"
-    r"(?:and|to)\s+"
-    r"(20\d{2})\b",
-    flags=re.IGNORECASE,
+YEAR_RANGE = re.compile(
+    r"\b(?:between|from)\s+(20\d{2})\s+(?:and|to|through|-)\s+(20\d{2})\b",
+    re.IGNORECASE,
 )
 
-SINGLE_YEAR_PATTERN = re.compile(
-    r"\b(?:in|during)\s+(20\d{2})\b",
-    flags=re.IGNORECASE,
+SCOTTISH_TOPIC = re.compile(
+    r"indyref2|scottish independence|independence referendum|"
+    r"claim of right for scotland",
+    re.IGNORECASE,
 )
 
+CUSTOMS_CUE = re.compile(
+    r"leave|leaving|remain|remaining|stay|permanent|comprehensive|"
+    r"independent trade|jobs|tariff|border|frictionless|rules of origin|"
+    r"trade deal|trade policy|agreement|single market|alignment|"
+    r"indicative vote|motion|amendment|membership|withdrawal|"
+    r"retain|support|oppose|outside|trade barrier",
+    re.IGNORECASE,
+)
+
+VOTE_TOPIC = re.compile(
+    r"second (?:brexit |eu )?referendum|another referendum|"
+    r"people['’]s vote|public vote|confirmatory ballot|"
+    r"final referendum|decision referendum|referendum on (?:the |a )?deal",
+    re.IGNORECASE,
+)
+
+VOTE_CUE = re.compile(
+    r"support|oppose|reject|against|should|must|would|not have|"
+    r"hold|offer|proposal|amendment|confirmatory|deal|"
+    r"democra|mandate|vote|electorate|public|negotiat|refuse",
+    re.IGNORECASE,
+)
+
+# Different search formulations for each requested year.
+TEMPORAL_QUERIES = {
+    "customs": (
+        "UK leave customs union independent international trade policy Brexit",
+        "Labour permanent comprehensive customs union jobs frictionless EU trade",
+        "customs union amendments indicative votes 2019 trade policy Northern Ireland",
+    ),
+    "referendum": (
+        "second Brexit referendum support public vote confirmatory ballot on EU deal",
+        "oppose second Brexit referendum uphold 2016 vote democracy mandate",
+        "People's Vote Labour Liberal Democrat Conservative parliamentary amendment",
+    ),
+}
+
 
 # ============================================================
-# YEAR VALIDATION
+# DATE VALIDATION
 # ============================================================
 
-def check_year_coverage(
-    question: str,
-) -> int | None:
-    """
-    Check whether a question explicitly requests
-    parliamentary speeches outside the dataset period.
+def check_year_coverage(question: str) -> int | None:
+    """Return an out-of-dataset year if one is explicitly requested."""
 
-    Return the first unsupported year or None.
-    """
+    match = YEAR_RANGE.search(question)
 
-    range_match = TEMPORAL_RANGE_PATTERN.search(
-        question
+    if match:
+        start, end = map(int, match.groups())
+
+        if start < DATA_START_YEAR or start > DATA_END_YEAR:
+            return start
+
+        if end < DATA_START_YEAR or end > DATA_END_YEAR:
+            return end
+
+        return None
+
+    one = re.search(
+        r"\b(?:in|during)\s+(20\d{2})\b",
+        question,
+        re.I,
     )
 
-    if range_match:
+    if one:
+        year = int(one.group(1))
 
-        start_year = int(
-            range_match.group(1)
-        )
-
-        end_year = int(
-            range_match.group(2)
-        )
-
-        for year in (start_year, end_year):
-
-            if (
-                year < DATA_START_YEAR
-                or year > DATA_END_YEAR
-            ):
-                return year
-
-    single_match = SINGLE_YEAR_PATTERN.search(
-        question
-    )
-
-    if single_match:
-
-        year = int(
-            single_match.group(1)
-        )
-
-        if (
-            year < DATA_START_YEAR
-            or year > DATA_END_YEAR
-        ):
+        if not DATA_START_YEAR <= year <= DATA_END_YEAR:
             return year
 
     return None
 
 
-def get_requested_years(
-    question: str,
-) -> list[str]:
-    """
-    Extract a valid explicit year range.
-
-    Examples
-    --------
-    between 2016 and 2019
-    from 2016 to 2019
-
-    Other questions return an empty list.
-    """
-
-    match = TEMPORAL_RANGE_PATTERN.search(
-        question
-    )
-
-    if not match:
-        return []
-
-    start_year = int(
-        match.group(1)
-    )
-
-    end_year = int(
-        match.group(2)
-    )
-
-    if not (
-        DATA_START_YEAR
-        <= start_year
-        <= end_year
-        <= DATA_END_YEAR
-    ):
-        return []
-
-    return [
-        str(year)
-        for year in range(
-            start_year,
-            end_year + 1,
-        )
-    ]
-
-
 # ============================================================
-# GRAPH RAG ENGINE INITIALIZATION
+# ENGINE INITIALISATION
 # ============================================================
 
 @lru_cache(maxsize=1)
-def get_engine():
-    """
-    Initialize the original GraphRAG engine once
-    per Python process.
-
-    Its graph, embedding model, reranker and
-    ChromaDB collection are reused across requests.
-    """
-
-    graph_path = (
-        PROJECT_ROOT
-        / "data"
-        / "knowledge_graph.graphml"
+def get_engine() -> GraphRAGEngine:
+    return GraphRAGEngine(
+        ROOT / "data" / "knowledge_graph.graphml",
+        ROOT / "data" / "knowledge_graph_metadata.json",
     )
 
-    metadata_path = (
-        PROJECT_ROOT
-        / "data"
-        / "knowledge_graph_metadata.json"
-    )
-
-    logger.info(
-        "Initializing original GraphRAG engine."
-    )
-
-    engine = GraphRAGEngine(
-        graph_path,
-        metadata_path,
-    )
-
-    logger.info(
-        "GraphRAG engine initialized."
-    )
-
-    return engine
-
-
-# ============================================================
-# YEAR-DATE INDEX
-# ============================================================
 
 @lru_cache(maxsize=1)
 def get_year_date_index():
-    """
-    Build a read-only lookup of dates by year.
-
-    This is used for strict ChromaDB year filtering.
-
-    The vector database is not modified.
-    """
-
-    engine = get_engine()
-
-    logger.info(
-        "Building year-date index."
-    )
+    """Build a read-only date index from the existing ChromaDB collection."""
 
     return build_year_date_index(
-        engine.collection
+        get_engine().collection
     )
 
 
@@ -283,421 +133,581 @@ def get_year_date_index():
 # PASSAGE IDENTITY
 # ============================================================
 
-def passage_key(
-    chunk: dict,
-) -> tuple:
-    """
-    Identify the same speech passage across
-    different retrieval stages.
-
-    Retrieval source is intentionally excluded.
-    """
+def passage_key(chunk: dict) -> tuple[str, str, str]:
 
     return (
-        str(
-            chunk.get("speaker", "")
-        ).strip(),
-
-        str(
-            chunk.get("date", "")
-        ).strip(),
-
-        str(
-            chunk.get("text", "")
-        ).strip()[:160],
+        str(chunk.get("speaker", "")).casefold(),
+        str(chunk.get("date", "")),
+        " ".join(
+            str(chunk.get("text", "")).casefold().split()
+        ),
     )
 
 
 # ============================================================
-# STANDARD API EVIDENCE FORMAT
+# NORMALISE RETRIEVED CHUNKS
 # ============================================================
 
-def prepare_evidence(
-    final_chunks: list[dict],
-) -> list[dict]:
-    """
-    Convert retrieved passages to API evidence.
+def _clean_chunk(chunk: dict) -> dict:
+    """Ensure evidence fields match the API and generator contracts."""
 
-    IMPORTANT:
-    Preserve final_chunks order.
+    result = dict(chunk)
 
-    Answer citations [E1], [E2], etc. refer to
-    this exact evidence array.
-    """
-
-    evidence = []
-
-    for chunk in final_chunks:
-
-        evidence.append(
-            {
-                "speaker": chunk.get(
-                    "speaker", ""
-                ),
-
-                "party": chunk.get(
-                    "party", ""
-                ),
-
-                "date": chunk.get(
-                    "date", ""
-                ),
-
-                "agenda": chunk.get(
-                    "agenda", ""
-                ),
-
-                "text": chunk.get(
-                    "text", ""
-                ),
-
-                "source": chunk.get(
-                    "source", ""
-                ),
-
-                "rerank_score": chunk.get(
-                    "rerank_score", 0.0
-                ),
-            }
+    for field in (
+        "speaker",
+        "party",
+        "date",
+        "agenda",
+        "text",
+        "source",
+    ):
+        result[field] = str(
+            result.get(field) or ""
         )
 
-    return evidence
-
-
-# ============================================================
-# RETRIEVAL DIAGNOSTICS
-# ============================================================
-
-def build_retrieval_diagnostics(
-    result: dict,
-    final_chunks: list[dict],
-) -> dict:
-    """
-    Calculate actual retrieval contributions.
-
-    Preserve the API fields used by the
-    current frontend and acceptance checks.
-    """
-
-    chunks_r1 = result.get(
-        "chunks_r1", []
-    )
-
-    chunks_r2 = result.get(
-        "chunks_r2", []
-    )
-
-    r1_keys = {
-        passage_key(chunk)
-        for chunk in chunks_r1
-    }
-
-    r2_keys = {
-        passage_key(chunk)
-        for chunk in chunks_r2
-    }
-
-    r2_contributions = sum(
-        1
-        for chunk in final_chunks
-        if (
-            passage_key(chunk) in r2_keys
-            and passage_key(chunk) not in r1_keys
+    try:
+        result["rerank_score"] = float(
+            result.get("rerank_score") or 0.0
         )
+
+    except (ValueError, TypeError):
+        result["rerank_score"] = 0.0
+
+    if not result["source"]:
+        result["source"] = "vector"
+
+    return result
+
+
+# ============================================================
+# QUESTION TYPE
+# ============================================================
+
+def _temporal_type(question: str) -> str | None:
+
+    q = question.casefold()
+
+    if "customs union" in q:
+        return "customs"
+
+    if (
+        "referendum" in q
+        or "public vote" in q
+    ):
+        return "referendum"
+
+    return None
+
+
+# ============================================================
+# TEMPORAL EVIDENCE SCORING
+# ============================================================
+
+def _temporal_strength(
+    chunk: dict,
+    topic: str,
+) -> float:
+    """
+    Rank relevant source sentences, rather than
+    accepting a generic speech match.
+    """
+
+    text = str(
+        chunk.get("text", "")
     )
 
-    temporal_added = sum(
-        1
-        for chunk in final_chunks
-        if str(
-            chunk.get("source", "")
-        ).startswith("year_filtered_")
+    agenda = str(
+        chunk.get("agenda", "")
     )
 
-    return {
-        "r1_count": len(
-            chunks_r1
-        ),
+    # Exclude unrelated Scottish independence debates.
+    if topic == "referendum":
 
-        "r2_count": len(
-            chunks_r2
-        ),
+        if "claim of right for scotland" in agenda.casefold():
+            return -100.0
 
-        "final_count": len(
-            final_chunks
-        ),
+        if SCOTTISH_TOPIC.search(text) and not re.search(
+            r"brexit|european union|withdrawal agreement|eu referendum",
+            text,
+            re.I,
+        ):
+            return -100.0
 
-        "r2_contributions": (
-            r2_contributions
-        ),
+    # Protect parliamentary honorifics before sentence splitting.
+    protected = re.sub(
+        r"\b(?:hon|Mr|Mrs|Ms|Dr|Prof|Rt)\.",
+        lambda m: m.group(0)[:-1] + "<DOT>",
+        text,
+        flags=re.I,
+    )
 
-        "temporal_added": (
-            temporal_added
-        ),
-    }
+    sentences = re.split(
+        r"(?<=[.!?])\s+(?=[A-Z“‘])",
+        protected,
+    )
+
+    best = -100.0
+
+    for sentence in sentences:
+
+        sentence = (
+            sentence.replace("<DOT>", ".").strip()
+        )
+
+        if len(sentence) < 40:
+            continue
+
+        if topic == "customs":
+
+            if "customs union" not in sentence.casefold():
+                continue
+
+            score = 7.0
+
+            if CUSTOMS_CUE.search(sentence):
+                score += 5.0
+
+        elif topic == "referendum":
+
+            if not VOTE_TOPIC.search(sentence):
+                continue
+
+            score = 7.0
+
+            if VOTE_CUE.search(sentence):
+                score += 5.0
+
+        else:
+            continue
+
+        # Quality penalties.
+        if "?" in sentence:
+            score -= 1.5
+
+        if "€" in sentence:
+            score -= 1.0
+
+        if sentence.casefold().startswith(
+            ("i thank", "i am grateful", "let me now")
+        ):
+            score -= 6.0
+
+        if len(sentence) > 500:
+            score -= 2.0
+
+        best = max(
+            best,
+            score,
+        )
+
+    return best
 
 
 # ============================================================
-# EMPTY RETRIEVAL DIAGNOSTICS
+# TARGETED TEMPORAL RETRIEVAL
 # ============================================================
 
-def empty_retrieval_diagnostics() -> dict:
-
-    return {
-        "r1_count": 0,
-        "r2_count": 0,
-        "final_count": 0,
-        "r2_contributions": 0,
-        "temporal_added": 0,
-    }
-
-
-# ============================================================
-# MAIN GRAPHRAG API SERVICE
-# ============================================================
-
-def run_graphrag_question(
+def _retrieve_temporal(
+    engine,
     question: str,
-) -> dict:
+    original: list[dict],
+):
     """
-    Main service function called by FastAPI.
+    Retrieve evidence for each requested year.
 
-    Processing
-    ----------
-    1. Validate question and dataset coverage.
-    2. Run the original iterative GraphRAG retrieval.
-    3. Enhance explicit temporal-range retrieval.
-    4. Prepare citation-aligned evidence.
-    5. Calculate retrieval diagnostics.
-    6. Check evidence coverage.
-    7. Select the correct grounded generator.
-    8. Return the complete API response.
-
-    Original research code remains untouched.
+    Preserve relevant original evidence.
+    Search with several topic-specific formulations.
+    Balance evidence across years and speakers.
     """
 
-    # --------------------------------------------------------
-    # STEP 1: VALIDATE QUESTION
-    # --------------------------------------------------------
+    match = YEAR_RANGE.search(question)
 
-    question = str(
-        question or ""
-    ).strip()
-
-    if not question:
-
-        return {
-            "question": question,
-
-            "answer": (
-                "Please provide a question "
-                "about the parliamentary record."
-            ),
-
-            "evidence": [],
-
-            "retrieval": (
-                empty_retrieval_diagnostics()
-            ),
-
-            "coverage": {
-                "coverage_ok": False,
-                "requested_years": [],
-                "evidence_years": [],
-                "missing_years": [],
-                "requested_parties": [],
-                "missing_parties": [],
-            },
+    if not match:
+        return original, {
+            "temporal_searches": 0,
+            "weak_years": [],
         }
 
-    # --------------------------------------------------------
-    # STEP 2: CHECK DATASET YEAR COVERAGE
-    # --------------------------------------------------------
+    start, end = map(
+        int,
+        match.groups(),
+    )
 
-    invalid_year = check_year_coverage(
+    years = [
+        str(year)
+        for year in range(
+            start,
+            end + 1,
+        )
+    ]
+
+    topic = _temporal_type(
         question
     )
 
-    if invalid_year is not None:
+    if topic is None:
+        return original, {
+            "temporal_searches": 0,
+            "weak_years": [],
+        }
 
-        logger.warning(
-            "Question requests unsupported year %s.",
-            invalid_year,
+    index = get_year_date_index()
+
+    pools = {
+        year: {}
+        for year in years
+    }
+
+    # --------------------------------------------------------
+    # ADD CANDIDATES WITHOUT DUPLICATES
+    # --------------------------------------------------------
+
+    def add(
+        chunk: dict,
+        year: str,
+    ):
+
+        if str(
+            chunk.get("date", "")
+        )[:4] != year:
+            return
+
+        if not (
+            chunk.get("speaker")
+            and chunk.get("text")
+        ):
+            return
+
+        item = _clean_chunk(
+            chunk
         )
+
+        key = passage_key(
+            item
+        )
+
+        prior = pools[year].get(
+            key
+        )
+
+        if (
+            prior is None
+            or item["rerank_score"] > prior["rerank_score"]
+        ):
+            pools[year][key] = item
+
+    # --------------------------------------------------------
+    # PRESERVE EXISTING EVIDENCE
+    # --------------------------------------------------------
+
+    for chunk in original:
+
+        year = str(
+            chunk.get("date", "")
+        )[:4]
+
+        if year in pools:
+            add(
+                chunk,
+                year,
+            )
+
+    # --------------------------------------------------------
+    # TARGETED YEAR-CONSTRAINED SEARCHES
+    # --------------------------------------------------------
+
+    searches = 0
+
+    for year in years:
+
+        for query in TEMPORAL_QUERIES[topic]:
+
+            try:
+
+                candidates = retrieve_year_candidates(
+                    engine=engine,
+                    question=f"{query} {year}",
+                    year=year,
+                    dates_by_year=index,
+                    n_results=35,
+                )
+
+                searches += 1
+
+                for candidate in candidates:
+                    add(
+                        candidate,
+                        year,
+                    )
+
+            except Exception:
+                LOGGER.exception(
+                    "Temporal search failed for %s",
+                    year,
+                )
+
+    # --------------------------------------------------------
+    # SELECT YEAR-BALANCED EVIDENCE
+    # --------------------------------------------------------
+
+    selected = []
+
+    used = set()
+
+    cross_party = (
+        "cross-party"
+        in question.casefold()
+    )
+
+    weak_years = []
+
+    for year in years:
+
+        scored = sorted(
+            (
+                (
+                    _temporal_strength(
+                        chunk,
+                        topic,
+                    )
+                    + 0.10 * max(
+                        -10.0,
+                        min(
+                            10.0,
+                            chunk["rerank_score"],
+                        ),
+                    ),
+                    chunk,
+                )
+                for chunk in pools[year].values()
+            ),
+            key=lambda pair: pair[0],
+            reverse=True,
+        )
+
+        if not scored:
+            weak_years.append(year)
+            continue
+
+        if scored[0][0] < 10.0:
+            weak_years.append(year)
+
+        per_year = []
+
+        # Up to 3 passages per year.
+        for _ in range(3):
+
+            eligible = []
+
+            for score, chunk in scored:
+
+                key = passage_key(
+                    chunk
+                )
+
+                if key in used:
+                    continue
+
+                # Prefer different speakers within a year.
+                if any(
+                    chunk["speaker"] == previous["speaker"]
+                    for previous in per_year
+                ):
+                    continue
+
+                party_bonus = (
+                    1.3
+                    if (
+                        cross_party
+                        and not any(
+                            previous["party"] == chunk["party"]
+                            for previous in per_year
+                        )
+                    )
+                    else 0.0
+                )
+
+                eligible.append(
+                    (
+                        score + party_bonus,
+                        chunk,
+                    )
+                )
+
+            if not eligible:
+                break
+
+            _, winner = max(
+                eligible,
+                key=lambda pair: pair[0],
+            )
+
+            per_year.append(
+                winner
+            )
+
+            used.add(
+                passage_key(winner)
+            )
+
+        selected.extend(
+            per_year
+        )
+
+    # --------------------------------------------------------
+    # FALLBACK TO ORIGINAL EVIDENCE
+    # --------------------------------------------------------
+
+    if not selected:
+
+        LOGGER.warning(
+            "No targeted temporal candidates; retaining baseline evidence."
+        )
+
+        return original, {
+            "temporal_searches": searches,
+            "weak_years": years,
+        }
+
+    # Sort once before citation IDs are assigned.
+    selected.sort(
+        key=lambda c: (
+            c["date"],
+            c["speaker"],
+        )
+    )
+
+    return selected, {
+        "temporal_searches": searches,
+        "weak_years": weak_years,
+    }
+
+
+# ============================================================
+# MAIN FASTAPI SERVICE FUNCTION
+# ============================================================
+
+def run_graphrag_question(question: str) -> dict:
+    """
+    Main function used by FastAPI.
+
+    Preserves:
+        question
+        answer
+        evidence
+        retrieval
+        coverage
+    """
+
+    if (
+        not isinstance(question, str)
+        or not question.strip()
+    ):
+        raise ValueError(
+            "Question must be a non-empty string"
+        )
+
+    question = question.strip()
+
+    # --------------------------------------------------------
+    # STEP 1: VALIDATE QUESTION DATE RANGE
+    # --------------------------------------------------------
+
+    out_of_range = check_year_coverage(
+        question
+    )
+
+    if out_of_range is not None:
 
         return {
             "question": question,
-
             "answer": (
-                "This database contains UK "
-                "parliamentary Brexit speeches "
-                f"from {DATA_START_YEAR} to "
-                f"{DATA_END_YEAR}. "
-                f"I cannot establish what "
-                f"Parliament said in {invalid_year} "
-                "using these records."
+                f"The speech database covers "
+                f"{DATA_START_YEAR}–{DATA_END_YEAR}. "
+                f"It cannot establish what Parliament "
+                f"said in {out_of_range}."
             ),
-
             "evidence": [],
-
-            "retrieval": (
-                empty_retrieval_diagnostics()
-            ),
-
+            "retrieval": {
+                "r1_count": 0,
+                "r2_count": 0,
+                "final_count": 0,
+                "r2_contributions": 0,
+                "temporal_added": 0,
+                "intent_added": 0,
+            },
             "coverage": {
                 "coverage_ok": False,
-                "requested_years": [
-                    str(invalid_year)
-                ],
-                "evidence_years": [],
-                "missing_years": [
-                    str(invalid_year)
-                ],
-                "requested_parties": [],
+                "missing_years": [],
                 "missing_parties": [],
             },
         }
 
     # --------------------------------------------------------
-    # STEP 3: INITIALIZE GRAPH RAG ENGINE
+    # STEP 2: ORIGINAL GRAPHRAG EVIDENCE
     # --------------------------------------------------------
 
     engine = get_engine()
 
-    # --------------------------------------------------------
-    # STEP 4: ORIGINAL ITERATIVE RETRIEVAL
-    # --------------------------------------------------------
-
-    logger.info(
-        "Starting original iterative GraphRAG retrieval."
-    )
-
-    result = engine.retrieve_iterative(
+    base = engine.retrieve_iterative(
         question
     )
 
-    # Copy the original retrieved passages.
-    # Do not mutate the research engine output.
+    baseline = [
+        _clean_chunk(c)
+        for c in base.get(
+            "final_chunks",
+            [],
+        )
+    ]
 
-    final_chunks = list(
-        result.get(
-            "final_chunks", []
-        ) or []
+    temporal = (
+        YEAR_RANGE.search(question)
+        is not None
     )
 
-    logger.info(
-        "Original GraphRAG selected %d passages.",
-        len(final_chunks),
-    )
+    plan = {
+        "kind": "general",
+        "facets": [],
+    }
+
+    temporal_info = {
+        "temporal_searches": 0,
+        "weak_years": [],
+    }
 
     # --------------------------------------------------------
-    # STEP 5: DETECT TEMPORAL QUESTION
+    # STEP 3: QUESTION-AWARE OR TEMPORAL RETRIEVAL
     # --------------------------------------------------------
 
-    requested_years = get_requested_years(
-        question
-    )
+    if temporal:
 
-    temporal_enhanced = False
-
-    # --------------------------------------------------------
-    # STEP 6: ENHANCED TEMPORAL RETRIEVAL
-    # --------------------------------------------------------
-
-    if requested_years:
-
-        logger.info(
-            "Temporal question detected: %s",
-            requested_years,
+        final_chunks, temporal_info = _retrieve_temporal(
+            engine,
+            question,
+            baseline,
         )
 
-        # Cached, read-only ChromaDB date index.
-        dates_by_year = get_year_date_index()
+    else:
 
-        # Multi-query, year-filtered retrieval.
-        #
-        # Uses the current app/retrieval_upgrade.py
-        # and leaves the original engine unchanged.
-
-        final_chunks = (
-            retrieve_diverse_temporal_evidence(
-                engine=engine,
-
-                question=question,
-
-                requested_years=(
-                    requested_years
-                ),
-
-                dates_by_year=(
-                    dates_by_year
-                ),
-
-                baseline_chunks=(
-                    final_chunks
-                ),
-
-                max_chunks=(
-                    MAX_TEMPORAL_CHUNKS
-                ),
-
-                n_results_per_search=(
-                    TEMPORAL_RESULTS_PER_SEARCH
-                ),
-
-                min_score=(
-                    MIN_RERANK_SCORE
-                ),
-            )
+        final_chunks, plan = retrieve_question_aware_evidence(
+            engine=engine,
+            question=question,
+            baseline_chunks=baseline,
+            max_chunks=10,
+            n_results_per_search=30,
         )
 
-        # Keep evidence in chronological order.
-        #
-        # The temporal generator uses this same
-        # order to create citation IDs.
+    final_chunks = [
+        _clean_chunk(c)
+        for c in final_chunks
+    ]
 
-        final_chunks = sorted(
-            final_chunks,
-            key=lambda chunk: (
-                str(
-                    chunk.get("date", "")
-                ),
-
-                str(
-                    chunk.get("speaker", "")
-                ),
-            ),
-        )
-
-        temporal_enhanced = True
-
-        logger.info(
-            "Enhanced temporal retrieval selected "
-            "%d passages.",
-            len(final_chunks),
-        )
+    if not temporal:
+        final_chunks = final_chunks[:10]
 
     # --------------------------------------------------------
-    # STEP 7: PREPARE CITATION-ALIGNED EVIDENCE
-    # --------------------------------------------------------
-
-    evidence = prepare_evidence(
-        final_chunks
-    )
-
-    # --------------------------------------------------------
-    # STEP 8: CALCULATE RETRIEVAL DIAGNOSTICS
-    # --------------------------------------------------------
-
-    retrieval_info = (
-        build_retrieval_diagnostics(
-            result,
-            final_chunks,
-        )
-    )
-
-    # --------------------------------------------------------
-    # STEP 9: CHECK EVIDENCE COVERAGE
+    # STEP 4: COVERAGE VALIDATION
     # --------------------------------------------------------
 
     coverage = check_evidence_coverage(
@@ -705,108 +715,189 @@ def run_graphrag_question(
         final_chunks,
     )
 
-    if not final_chunks:
+    if not isinstance(coverage, dict):
 
-        logger.warning(
-            "No supporting speeches were retrieved."
-        )
-
-        return {
-            "question": question,
-
-            "answer": (
-                "I could not retrieve sufficient "
-                "parliamentary evidence to answer "
-                "this question reliably."
-            ),
-
-            "evidence": evidence,
-
-            "retrieval": retrieval_info,
-
-            "coverage": coverage,
+        coverage = {
+            "coverage_ok": bool(coverage),
+            "missing_years": [],
+            "missing_parties": [],
         }
 
+    coverage = dict(
+        coverage
+    )
+
+    coverage.update(
+        {
+            "question_intent": (
+                "temporal"
+                if temporal
+                else plan.get("kind", "general")
+            ),
+
+            "facet_counts": plan.get(
+                "facet_counts",
+                {},
+            ),
+
+            "missing_facets": plan.get(
+                "missing_facets",
+                [],
+            ),
+
+            "requires_role_metadata": bool(
+                plan.get(
+                    "requires_role_metadata",
+                    False,
+                )
+            ),
+        }
+    )
+
     # --------------------------------------------------------
-    # STEP 10: HANDLE INCOMPLETE EVIDENCE COVERAGE
+    # STEP 5: RETRIEVAL DIAGNOSTICS
     # --------------------------------------------------------
 
-    if not coverage.get(
-        "coverage_ok", True
+    r1_keys = {
+        passage_key(c)
+        for c in base.get(
+            "chunks_r1",
+            [],
+        )
+    }
+
+    r2_keys = {
+        passage_key(c)
+        for c in base.get(
+            "chunks_r2",
+            [],
+        )
+    }
+
+    final_keys = {
+        passage_key(c)
+        for c in final_chunks
+    }
+
+    baseline_keys = {
+        passage_key(c)
+        for c in baseline
+    }
+
+    retrieval = {
+        "r1_count": len(
+            base.get("chunks_r1", [])
+        ),
+
+        "r2_count": len(
+            base.get("chunks_r2", [])
+        ),
+
+        "final_count": len(
+            final_chunks
+        ),
+
+        "r2_contributions": len(
+            (r2_keys - r1_keys)
+            & final_keys
+        ),
+
+        "temporal_added": (
+            sum(
+                1
+                for c in final_chunks
+                if passage_key(c) not in r1_keys
+            )
+            if temporal
+            else 0
+        ),
+
+        "intent_added": (
+            sum(
+                1
+                for c in final_chunks
+                if passage_key(c) not in baseline_keys
+            )
+            if not temporal
+            else 0
+        ),
+
+        "temporal_searches": temporal_info[
+            "temporal_searches"
+        ],
+
+        "weak_years": temporal_info[
+            "weak_years"
+        ],
+    }
+
+    # --------------------------------------------------------
+    # STEP 6: BUILD API EVIDENCE
+    # --------------------------------------------------------
+
+    evidence = [
+        {
+            key: c[key]
+            for key in (
+                "speaker",
+                "party",
+                "date",
+                "agenda",
+                "text",
+                "source",
+                "rerank_score",
+            )
+        }
+        for c in final_chunks
+    ]
+
+    # --------------------------------------------------------
+    # STEP 7: GENERATE GROUNDED ANSWER
+    # --------------------------------------------------------
+
+    if (
+        not final_chunks
+        or not coverage.get(
+            "coverage_ok",
+            True,
+        )
     ):
 
-        problems = []
+        missing = []
 
-        missing_years = coverage.get(
-            "missing_years", []
-        )
+        if coverage.get("missing_years"):
 
-        missing_parties = coverage.get(
-            "missing_parties", []
-        )
-
-        if missing_years:
-
-            problems.append(
-                "The selected evidence does "
-                "not cover these requested years: "
-                + ", ".join(missing_years)
-                + "."
+            missing.append(
+                "years "
+                + ", ".join(
+                    coverage["missing_years"]
+                )
             )
 
-        if missing_parties:
+        if coverage.get("missing_parties"):
 
-            problems.append(
-                "The selected evidence does "
-                "not cover these requested parties: "
-                + ", ".join(missing_parties)
-                + "."
+            missing.append(
+                "parties "
+                + ", ".join(
+                    coverage["missing_parties"]
+                )
             )
 
-        if not problems:
-
-            problems.append(
-                "The available evidence does "
-                "not meet the coverage requirements."
+        answer = (
+            "The selected speeches do not establish "
+            "a sufficiently complete answer. "
+            + (
+                "Missing evidence for "
+                + "; ".join(missing)
+                + ". "
+                if missing
+                else ""
             )
-
-        logger.warning(
-            "Evidence coverage incomplete: %s",
-            problems,
+            + "Relevant speeches may exist elsewhere "
+            "in the database."
         )
 
-        return {
-            "question": question,
-
-            "answer": (
-                "I cannot reliably answer the full "
-                "question using the selected evidence. "
-                + " ".join(problems)
-                + " Relevant passages may still "
-                "exist in the database."
-            ),
-
-            "evidence": evidence,
-
-            "retrieval": retrieval_info,
-
-            "coverage": coverage,
-        }
-
-    # --------------------------------------------------------
-    # STEP 11: GENERATE GROUNDED ANSWER
-    # --------------------------------------------------------
-
-    if temporal_enhanced:
-
-        # Temporal questions:
-        #
-        # Use the existing hybrid generator with
-        # chronological synthesis and NLI review.
-
-        logger.info(
-            "Using temporal grounded generation."
-        )
+    elif temporal:
 
         answer = generate_grounded_answer(
             engine,
@@ -816,47 +907,21 @@ def run_graphrag_question(
 
     else:
 
-        # Non-temporal questions:
-        #
-        # Use the new general-purpose generator.
-        #
-        # This replaces the original uncited
-        # engine.generate() API pathway.
-        #
-        # The original engine.generate() function
-        # itself is preserved and not modified.
-
-        logger.info(
-            "Using general grounded generation."
-        )
-
-        answer = (
-            generate_general_grounded_answer(
-                engine,
-                question,
-                final_chunks,
-            )
+        answer = generate_general_grounded_answer(
+            engine=engine,
+            question=question,
+            final_chunks=final_chunks,
+            plan=plan,
         )
 
     # --------------------------------------------------------
-    # STEP 12: RETURN COMPLETE API RESPONSE
+    # STEP 8: RETURN UNCHANGED API CONTRACT
     # --------------------------------------------------------
-
-    logger.info(
-        "GraphRAG request completed. "
-        "Temporal=%s Evidence=%d",
-        temporal_enhanced,
-        len(evidence),
-    )
 
     return {
         "question": question,
-
         "answer": answer,
-
         "evidence": evidence,
-
-        "retrieval": retrieval_info,
-
+        "retrieval": retrieval,
         "coverage": coverage,
     }

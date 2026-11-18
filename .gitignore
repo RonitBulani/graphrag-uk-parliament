@@ -38,3 +38,29 @@ checkpoints/
 # Temporary
 *.log
 *.tmp
+
+# Portfolio application hygiene
+
+# React / Vite
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.vite/
+/frontend/coverage/
+
+# Allow only deliberately public data files
+/data/*
+!/data/README.md
+!/data/questions.json
+!/data/parlspeech_brexit_sample_50.csv
+
+# Exploratory development scripts
+/learning_exercises/
+
+# Local logs and diagnostic traces
+*.jsonl
+
+# Backups and temporary source versions
+*.bak
+*.orig
+*_backup.py
+*_backup_*.py

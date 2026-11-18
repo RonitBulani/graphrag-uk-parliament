@@ -1,234 +1,310 @@
-# GraphRAG for Multi-Hop Parliamentary Reasoning
 
-A solo MSc Data Science project exploring whether graph-guided retrieval improves question answering over UK parliamentary Brexit speeches when the question requires evidence across several speakers, parties, topics or time periods.
+# ParliamentAI: GraphRAG for UK Parliamentary Brexit Debates
 
-The project compares a strong hybrid RAG baseline with a GraphRAG pipeline built around a speaker-party-topic-year knowledge graph. The goal was not to assume that GraphRAG would be better, but to test where the extra structure helps and where it does not.
+An evidence-backed research application for exploring parliamentary Brexit debates, built with Python, NetworkX, ChromaDB, FastAPI and React.
 
-![Retrieval quality by reasoning complexity](figures/fig1_hop_comparison.png)
+The project began as an MSc Data Science investigation into whether graph-guided retrieval improves multi-hop question answering compared with a strong hybrid RAG baseline. It was subsequently extended into **ParliamentAI**, a full-stack application that lets users ask questions, inspect parliamentary speech evidence, filter sources and export research conversations.
 
-## Project at a glance
+The original benchmark and interactive application are related but distinct: the benchmark evaluates retrieval approaches, while ParliamentAI demonstrates an integrated research workflow.
 
-- **39,423** Brexit-related parliamentary speeches used in the full experiment
-- **201,131** sentence-aware text chunks indexed for retrieval
-- **1,806 nodes / 42,634 edges** in the knowledge graph
-- **50 evaluation questions** split across 1-hop, 2-hop and 3-hop reasoning
-- **7 evaluation metrics** covering retrieval quality, answer quality, faithfulness and diversity
-- Local LLM inference through **Ollama** rather than a hosted generation API
+## Project overview
 
-## Why this project
+| Component | Technology |
+|---|---|
+| Knowledge graph | NetworkX |
+| Vector database | ChromaDB |
+| Embeddings | BAAI/bge-small-en-v1.5 |
+| Retrieval | Dense, lexical, graph-guided and reranked retrieval |
+| Backend | Python, FastAPI |
+| Frontend | React, Vite |
+| Local LLM experiments | Ollama |
+| Evaluation | Retrieval, answer quality, faithfulness and diversity metrics |
 
-Vector search is usually effective when the answer sits in one obvious passage. It is less straightforward when a question asks for a comparison across parties, a change over time, or evidence spanning several debates.
+**Original research experiment**
 
-I wanted to test whether explicit relationships between speakers, parties, topics and years could make retrieval more useful for those multi-hop questions. To make the comparison meaningful, the baseline is deliberately competitive rather than a simple vector-only system.
+- 39,423 Brexit-related parliamentary speeches
+- 201,131 indexed text chunks
+- Knowledge graph with 1,806 nodes and 42,634 edges
+- 50 evaluation questions across three reasoning-complexity levels
+- Comparison of hybrid RAG with graph-guided retrieval
 
-## System design
+The data-loading script accepts House of Commons records from 2015 through 2020. The current ParliamentAI interface is presented as a Brexit debate explorer focused on 2015–2019.
 
-### 1. Data preparation
+## ParliamentAI application
 
-The data pipeline filters UK parliamentary speeches to Brexit-related material, normalises speaker names, removes procedural speakers and very short records, and deduplicates exact speech text.
+The interactive application supports:
 
-Speeches are then split into overlapping sentence-aware chunks and embedded with `BAAI/bge-small-en-v1.5` for storage in ChromaDB.
+- Natural-language questions about parliamentary Brexit debates
+- Answers with numbered evidence references such as `[E1]`
+- Supporting speeches with speaker, party, date and debate metadata
+- Citation navigation from answers to original retrieved passages
+- Party, year and cited-only evidence filters
+- Browser-local persistent conversation history
+- Searchable previous conversations
+- Copying answers and source passages
+- Markdown and JSON exports
+- JSON backup of saved conversations
 
-### 2. Hybrid RAG baseline
+The frontend communicates with the FastAPI endpoint:
 
-The baseline combines several retrieval signals:
+`POST /graphrag/ask`
 
-- direct dense retrieval
-- HyDE retrieval
-- BM25 lexical retrieval
-- party-targeted retrieval
-- year-aware retrieval
-- reciprocal-rank fusion
-- cross-encoder reranking
-- party-diversity controls
+The older `/ask` route is a placeholder and is not used by ParliamentAI.
 
-This matters because GraphRAG is being compared against a realistic hybrid retriever, not a weak strawman.
+### Application architecture
 
-### 3. Knowledge graph
+```text
+React frontend
+    |
+    | POST /graphrag/ask
+    v
+FastAPI
+    |
+    v
+GraphRAG service
+    |
+    +-- Question-aware and temporal retrieval
+    |
+    +-- ChromaDB vector retrieval
+    |
+    +-- NetworkX graph guidance
+    |
+    +-- Cross-encoder reranking
+    |
+    +-- Grounded answer generation
+    |
+    v
+Answer + numbered evidence passages
+    |
+    v
+React citations, source filters,
+conversation history and exports
+```
 
-The NetworkX graph represents four main entity types:
+See [Architecture](docs/ARCHITECTURE.md) for further detail.
 
-- **Speakers**
-- **Parties**
-- **Topics**
-- **Years**
+## Research motivation
 
-Edges capture membership, topic participation, temporal discussion and repeated co-debate relationships. Topic-speech edges also retain aggregate counts and sentiment information used by the retrieval logic.
+Conventional vector retrieval can work well when a question is answered by one directly relevant passage. Parliamentary questions are often more complicated.
 
-### 4. GraphRAG retrieval
+Questions may require:
 
-The GraphRAG system adds graph structure before final document retrieval. It uses:
+- Comparing different political parties
+- Connecting statements from several MPs
+- Following arguments across multiple debates
+- Identifying changes over time
+- Retrieving evidence spanning different parliamentary topics
 
-- speaker / party / year entity extraction
-- semantic topic matching
-- weighted graph traversal
-- topic-level speaker scoring
-- debate-community detection
-- bridge-speaker identification
-- temporal relevance
-- graph-guided candidate retrieval
-- graph-score boosting
-- iterative retrieve-draft-retrieve logic
-- cross-encoder reranking
-- final party-diversity controls
+The research question was whether explicit graph relationships could improve retrieval for these more complex tasks.
 
-The implementation keeps retrieval provenance so retrieved evidence can be traced back to the mechanism that surfaced it.
+Importantly, the comparison used a competitive hybrid baseline rather than vector search alone.
 
-## Evaluation
+## Data preparation
 
-The benchmark contains **50 questions** with explicit reasoning-complexity labels:
+The preprocessing pipeline filters ParlSpeech V2 House of Commons material for Brexit-related content, normalises speaker names, removes procedural and very short records, and deduplicates exact speech text.
 
-- **14 one-hop questions**
-- **17 two-hop questions**
-- **19 three-hop questions**
+Speeches are segmented into overlapping, sentence-aware chunks and embedded with `BAAI/bge-small-en-v1.5`.
 
-The evaluation uses MRR, nDCG@5, BERTScore, NLI-based faithfulness,
-RAGAS answer relevancy, RAGAS context precision and retrieved-speaker
-diversity.
+These embeddings are stored in ChromaDB with speaker, party, date and debate metadata.
 
-For **MRR and nDCG@5**, relevance is an **entity-based proxy**: a retrieved
-chunk is counted as relevant when its speaker or party matches the target
-speaker/party set derived for that question. These are therefore not
-independently human-judged passage-relevance metrics.
+The full data and persistent vector database are not committed to GitHub. A sample and benchmark questions are available in `data/`.
 
-Reference answers were produced using a **TREC-style pooled-reference
-procedure**: evidence retrieved by both systems was pooled before a reference
-answer was generated. I therefore describe these as *pooled references*, not
-independently human-annotated ground truth.
+## Knowledge graph
 
-## Results
+The graph is constructed programmatically with NetworkX.
 
-Across all 50 questions:
+It uses four primary node categories:
 
-| Metric | Hybrid RAG | GraphRAG | Difference |
-|---|---:|---:|---:|
-| MRR | 0.725 | **0.762** | +0.037 |
-| nDCG@5 | 0.801 | **0.818** | +0.017 |
-| BERTScore | **0.799** | 0.786 | -0.013 |
-| NLI faithfulness | 0.114 | **0.122** | +0.009 |
-| Answer relevancy | **0.590** | 0.538 | -0.052 |
-| Context precision | 0.446 | **0.462** | +0.016 |
-| Speaker diversity | 4.14 | **4.98** | +0.84 MPs |
+- **SPEAKER**
+- **PARTY**
+- **TOPIC**
+- **YEAR**
 
-GraphRAG was numerically higher on **5 of the 7 metrics**. The clearest
-GraphRAG-side statistically supported difference was speaker diversity, where
-the increase of **0.84 unique MPs per question** was significant under a paired
-Wilcoxon signed-rank test (`p < 0.001`).
+Its relationships include speaker-party membership, topic participation, topic-year discussion and repeated participation in the same debates.
 
-The hybrid baseline, however, had the higher **BERTScore** (**0.799 vs 0.786**),
-and that paired difference was also statistically significant in this
-experiment (`p ≈ 0.008`).
+The graph also retains frequency statistics and aggregate TextBlob sentiment values. Sentiment is a general text-polarity measure, **not a reliable label for an MP's Brexit stance**.
 
-MRR and nDCG@5 improved on average, including at the 3-hop level, but those
-paired differences were not statistically significant in this 50-question
-benchmark. Answer relevancy was also lower for GraphRAG. Together, these
-results suggest a trade-off between broader structural coverage and some
-answer-similarity/relevancy measures rather than a uniform improvement.
+The graph is not generated by an LLM.
 
-![Metric distributions](figures/fig6_distributions.png)
+## Retrieval systems
 
-More detail is in [`results/RESULTS.md`](results/RESULTS.md).
+### Hybrid RAG baseline
+
+The experimental baseline combines dense search, HyDE, BM25, party-aware retrieval and temporal retrieval, followed by reciprocal-rank fusion and cross-encoder reranking.
+
+### GraphRAG
+
+The graph-guided approach uses extracted speaker, party and year information, semantic topic matching, graph traversal, relevant-speaker identification and graph-assisted candidate retrieval.
+
+The current application additionally uses question-aware evidence selection and dedicated handling for explicitly temporal questions.
+
+The application defaults to an extractive grounded-answer mode that keeps responses tied to retrieved parliamentary passages.
+
+See [Methodology](docs/METHODOLOGY.md) for the original experimental design.
+
+## Original research evaluation
+
+The benchmark contains 50 questions:
+
+- 14 one-hop questions
+- 17 two-hop questions
+- 19 three-hop questions
+
+The following are results from the **original offline research experiment**, not an independent evaluation of every version of the current React application.
+
+| Metric | Hybrid RAG | GraphRAG |
+|---|---:|---:|
+| MRR | 0.725 | **0.762** |
+| nDCG@5 | 0.801 | **0.818** |
+| BERTScore | **0.799** | 0.786 |
+| NLI faithfulness | 0.114 | **0.122** |
+| Answer relevancy | **0.590** | 0.538 |
+| Context precision | 0.446 | **0.462** |
+| Speaker diversity | 4.14 | **4.98** |
+
+GraphRAG was numerically higher on five of seven metrics.
+
+The most clearly supported GraphRAG advantage was **speaker diversity**, with a paired Wilcoxon test giving `p < 0.001`. The hybrid baseline performed better on BERTScore, with `p ≈ 0.008`.
+
+Average improvements in MRR and nDCG@5 were not statistically significant in this 50-question evaluation.
+
+MRR and nDCG@5 use an entity-based relevance proxy rather than independent human-labelled passage relevance. Reference answers were generated from pooled evidence, not human-written ground truth.
+
+The findings indicate trade-offs rather than universal superiority of GraphRAG.
+
+For additional analysis, see [Evaluation Results](results/RESULTS.md).
+
+## Application validation
+
+The current application has undergone the following checks:
+
+| Check | Observed result |
+|---|---|
+| Backend structural acceptance suite | 8/8 passed |
+| FastAPI contract tests | 3/3 passed |
+| Conversation history interactions | 6/6 passed |
+| Export interactions | 5/5 passed |
+| Frontend ESLint | Passed without reported issues |
+| Frontend production build | Passed |
+| Production-dependency npm audit | 0 reported vulnerabilities |
+
+The eight backend acceptance checks focus on evidence coverage, citation integrity and structural behaviour. They **do not prove complete historical accuracy**.
+
+The FastAPI contract tests mock the expensive GraphRAG service. They verify route and response behaviour, not retrieval relevance or answer quality.
+
+Some historical summaries may be incomplete or may describe an objection raised by another speaker as though it were the speaker's own position. Users should consult the original cited passage before relying on an interpretation.
 
 ## Repository structure
 
 ```text
 graphrag-uk-parliament/
-├── src/
-│   ├── 01_data_loading.py
-│   ├── 02_vectorisation.py
-│   ├── 03_knowledge_graph.py
-│   ├── 04_naive_rag.py
-│   ├── 05_graphrag.py
-│   ├── 06_generate_pooled_references.py
-│   └── 07_evaluation.py
-├── data/
-│   ├── questions.json
-│   ├── parlspeech_brexit_sample_50.csv
-│   └── README.md
-├── results/
-│   ├── evaluation_results.json
-│   ├── aggregate_metrics.csv
-│   ├── metrics_by_hop.csv
-│   └── RESULTS.md
-├── figures/
-│   └── evaluation figures
-├── scripts/
-│   └── make_figures.py
-├── docs/
-│   ├── METHODOLOGY.md
-│   └── REPRODUCIBILITY.md
+├── app/                # FastAPI and grounded retrieval service
+├── src/                # Original research pipeline and GraphRAG engines
+├── frontend/           # React/Vite research interface
+├── tests/              # Maintained API contract tests
+├── data/               # Public sample, benchmark and data instructions
+├── results/            # Curated original evaluation results
+├── figures/            # Research evaluation figures
+├── scripts/            # Research utilities
+├── docs/               # Methodology, architecture and reproducibility
 ├── requirements.txt
 ├── .gitignore
 ├── LICENSE
 └── README.md
 ```
 
-## Running the project
+## Running ParliamentAI locally
 
-The project was developed with Python 3.10+.
+### Requirements
 
-```bash
+- Python 3.12
+- Node.js and npm compatible with the installed Vite version
+- The full preprocessed parliamentary corpus and generated graph/vector artifacts for the complete backend
+- Sufficient memory and storage for the local retrieval models
+
+Clone the repository and create a Python environment:
+
+```powershell
+git clone https://github.com/RonitBulani/graphrag-uk-parliament.git
+cd graphrag-uk-parliament
+
 python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 
-# Windows
-.venv\Scripts\activate
-
-# macOS / Linux
-source .venv/bin/activate
-
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
-The retrieval and generation stages use local Ollama models:
+The public repository does not include the complete data and indexes. Build or supply them following [Reproducibility](docs/REPRODUCIBILITY.md).
 
-```bash
-ollama pull qwen2.5:3b
-ollama pull phi3:mini
+Start FastAPI:
+
+```powershell
+$env:GRAPHRAG_ENABLE_R2 = "0"
+$env:GRAPHRAG_GENERATION_MODE = "extractive"
+$env:GRAPHRAG_NLI_ENABLED = "0"
+
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-NLTK resources used by preprocessing/evaluation may also need to be installed once:
+Start React in another terminal:
 
-```python
-import nltk
-nltk.download("punkt")
-nltk.download("punkt_tab")
-nltk.download("stopwords")
+```powershell
+cd frontend
+npm.cmd ci
+npm.cmd run dev
 ```
 
-After obtaining the source ParlSpeech data described in [`data/README.md`](data/README.md), run the pipeline in order:
+Open `http://127.0.0.1:5173/`.
 
-```bash
-python src/01_data_loading.py
-python src/02_vectorisation.py
-python src/03_knowledge_graph.py
-python src/04_naive_rag.py
-python src/05_graphrag.py
-python src/06_generate_pooled_references.py
-python src/07_evaluation.py
-python scripts/make_figures.py
+The interactive frontend uses the `/graphrag/ask` endpoint.
+
+### Frontend checks
+
+```powershell
+cd frontend
+npm.cmd run lint
+npm.cmd run build
+npm.cmd audit --omit=dev
 ```
 
-Some stages are computationally expensive. Vectorisation, graph construction and the full 50-question evaluation are intended as offline experiment stages rather than interactive commands.
+At the time of the release preparation, the production-dependency audit reported no vulnerabilities. A separate development-dependency `picomatch` advisory was still under review.
 
-## What I would change next
+## Reproducing the original experiment
 
-There are several obvious extensions rather than pretending this experiment settles the GraphRAG question:
+The original offline workflow consists of:
 
-- replace the entity-based MRR/nDCG relevance proxy with independently human-annotated passage-relevance judgements
-- expand the question set and run repeated evaluation with additional LLM judges
-- ablate individual graph components to measure which ones actually drive the gains
-- replace lightweight sentiment proxies with task-specific stance representations
-- test the same retrieval design on a non-political corpus to separate domain effects from graph effects
+```text
+01_data_loading.py
+02_vectorisation.py
+03_knowledge_graph.py
+04_naive_rag.py
+05_graphrag.py
+06_generate_pooled_references.py
+07_evaluation.py
+```
 
-## Notes on political content
+The full corpus must first be acquired from its source. Some stages are computationally expensive and can rebuild existing generated artifacts.
 
-The project analyses parliamentary speech as a retrieval and information-retrieval benchmark. It does not assign political recommendations or endorsements. Generated answers are experimental outputs and should not be treated as authoritative summaries of political history without checking the underlying source material.
+For model preparation, dataset paths, execution order and reproducibility limitations, see [Reproducibility](docs/REPRODUCIBILITY.md).
+
+## Limitations
+
+- The full ParlSpeech corpus and generated ChromaDB index are not included in the repository.
+- The original benchmark contains only 50 questions.
+- Pooled references are generated rather than independently human-annotated.
+- Entity-based retrieval metrics do not constitute passage-level relevance judgements.
+- Sentiment polarity does not establish political stance.
+- Correctly numbered citations do not guarantee that the interpretation is correct.
+- Saved conversations are stored in the current browser, not a shared backend database.
+- Conversation export is supported; importing a backup is not yet implemented.
+- Deployment hardening, public hosting and broader security review remain future work.
 
 ## Author
 
-**Ronit Bulani**  
+Ronit Bulani
+
 MSc Data Science, Lancaster University
 
 ## Licence
 
-Code in this repository is released under the MIT Licence. Third-party datasets, model weights and parliamentary source material remain subject to their own licences and terms.
+The project code is released under the MIT Licence. Third-party datasets, parliamentary source material and model weights remain governed by their respective licences and terms.
