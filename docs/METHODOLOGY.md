@@ -6,7 +6,7 @@ The experiment asks whether explicit graph structure improves retrieval for ques
 
 ## Corpus preparation
 
-The data-loading stage filters ParlSpeech material to Brexit-related UK parliamentary speeches between 2015 and 2020. It normalises speaker names, removes procedural speakers, drops very short records and exact text duplicates, and writes a cleaned corpus for downstream use.
+The data-loading stage applies a 2015-01-01 through 2020-12-31 date filter to prepared ParlSpeech-derived House of Commons records. This is the script's accepted date window, not evidence that the source includes records through 2020; the published ParlSpeech V2 UK corpus extends to 2019. The stage normalises speaker names, removes procedural speakers, drops very short records and exact text duplicates, and writes a cleaned corpus for downstream use. See [data provenance](../data/README.md) for the prepared CSV archive requirement.
 
 The public repository includes only a small sample for inspection. The full derived corpus is not committed.
 
